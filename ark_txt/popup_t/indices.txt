@@ -1,0 +1,15 @@
+    
+    Os índices são gerados aleatoriamente e estão divididos
+entre HABILIDADE, ENERGIA e SORTE.
+
+HABILIDADE: Expressa sua capacidade como espadachim e
+eficiência geral nas lutas, quanto mais alto melhor;
+
+ENERGIA: Expressa sua constituição física geral, sua
+vontade de sobreviver, sua determinação e aptidão global.
+Quanto mais alto for o seu índice de ENERGIA,  mais tempo
+você conseguirá sobreviver;
+
+SORTE: Indica o quanto você é naturalmente uma pessoa de
+sorte. Sorte (magia) são fatos da vida no reino de fantasia
+que você está se preparando para explorar.

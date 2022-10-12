@@ -82,5 +82,3 @@ def tela_morte():
     ]
     return sg.Window('',size=(550,850),border_depth=(-15),layout=layout, finalize=True, element_justification='c',
     icon='Icon\Sabio.ico', location=tuple(sg.user_settings_get_entry('-last position-', (None, None))))
-
-    

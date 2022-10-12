@@ -9,15 +9,16 @@ import time
 import os
 
 #funções complementares
-import telas_iniciais
-import telas_de_introdução
-import telas_jogo_0_100
-import telas_jogo_101_200
-import telas_jogo_201_300
-import telas_jogo_301_400
+from bibliotecas_internas import telas_iniciais
+from bibliotecas_internas import telas_de_introdução
+from bibliotecas_internas import telas_jogo_0_100
+from bibliotecas_internas import telas_jogo_101_200
+from bibliotecas_internas import telas_jogo_201_300
+from bibliotecas_internas import telas_jogo_301_400
+from bibliotecas_internas import telas_recorentes
+
 import dados
 import gerador_de_arquivos_txt
-import telas_recorentes
 import gerador_de_mostro
 import aplicador_de_dano
 import alterador_de_indices

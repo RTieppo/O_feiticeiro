@@ -1,4 +1,4 @@
-   Finalmente a sua caminhada de dois dias chegou ao fim.
+Finalmente a sua caminhada de dois dias chegou ao fim.
 Você desembainha a sua espada, coloca-a no chão e suspira
 aliviado, enquanto se abaixa para se sentar nas pedras 
 cheias de musgo para um momento de descanso.
@@ -7,28 +7,29 @@ cheias de musgo para um momento de descanso.
 para na Montanha do Cume de Fogo. A própria montanha em
 si já tem um ar ameaçador. Algum animal gigantesco parece
 ter deixado as marcas de suas garras na encosta íngreme
-diante de você.
+diante de você. 
 
    Penhascos rochosos e pontudos se projetam, formando
-ângulos estranhos. No cume você já pode vislumbrar a sin-
-istra coloração vermelha - provavelmente alguma vegeta-
-ção misteriosa - que deu nome à montanha.
+ângulos estranhos. No cume você já pode vislumbrar a
+sinistra coloração vermelha, provavelmente alguma
+vegetação misteriosa que deu nome à montanha.
 
-   Talvez ninguém jamais chegue a saber o que cresce lá
-em cima, uma vez que escalar o pico deve ser com certeza
+   Talvez ninguém jamais venha a saber o que cresce lá
+em cima, uma vez que, escalar o pico deve ser com
 certeza impossível. Sua busca está para começar.
 
-   Do outro lado da clareira há uma escura entrada de cav-
-erna. Você pega a sua espada, levanta-se e considera que
-perigos podem estar à sua frente. Mas, com determinação,
-você recoloca a sua espada na bainha e se aproxima da
-caverna.
+   Do outro lado da clareira há uma escura entrada de
+caverna. Você pega a sua espada, levanta-se e considera
+que perigos podem estar à sua frente. Mas, com
+determinação, você recoloca a sua espada na bainha e se
+aproxima da caverna.
+
    Você dá uma primeira olhada na penumbra e vê-paredes
-escuras e úmidas com poças de água no chão de pedra à sua 
-frente. O ar é frio e úmido. Você acende a sua lanterna
-e avança cautelosamente pela escuridão. Teias de aranha
-tocam seu rosto e você ouve a movimentação de pés minús-
-culos: muito provavelmente, ratazanas. Você adentra a
-caverna. Depois de uns poucos metros, chega logo a uma 
-encruzilhada.
+escuras e úmidas com poças de água no chão de pedra à sua
+frente. O ar é frio e úmido. Você acende a lanterna e
+avança cautelosamente pela escuridão. Teias de aranha
+tocam seu rosto e você ouve a movimentação de pés minúsculos,
+muito provavelmente ratazanas. Você adentra a caverna.
+Depois de uns poucos metros, chega logo a uma encruzilhada.
+
             Você vai virar para o oeste ou para o leste?

@@ -9,13 +9,13 @@ import time
 import os
 
 #funções complementares
-from bibliotecas_internas import telas_iniciais
-from bibliotecas_internas import telas_de_introdução
-from bibliotecas_internas import telas_jogo_0_100
-from bibliotecas_internas import telas_jogo_101_200
-from bibliotecas_internas import telas_jogo_201_300
-from bibliotecas_internas import telas_jogo_301_400
-from bibliotecas_internas import telas_recorentes
+from biblioteca_de_telas import telas_iniciais
+from biblioteca_de_telas import telas_de_introdução
+from biblioteca_de_telas import telas_jogo_0_100
+from biblioteca_de_telas import telas_jogo_101_200
+from biblioteca_de_telas import telas_jogo_201_300
+from biblioteca_de_telas import telas_jogo_301_400
+from biblioteca_de_telas import telas_recorentes
 
 import dados
 import gerador_de_arquivos_txt
@@ -25,8 +25,7 @@ import alterador_de_indices
 import gerador_mapa
 import efeitos_sonoros
 
-#gravação de fonte fora do sistema
-
+#puxafonte fora do sistema
 constants.COINIT_MULTITHREADED = 0x2
 
 pyglet.font.add_file(r'.\font\PixelOperator8-Bold.ttf')
@@ -62,6 +61,19 @@ ativação_botão_sorte = 0
 
 #variaveis de combate
 resultado_batalha = ' '
+
+#indices base do jogador
+energia = habilidade = sorte = provisoes = 0
+
+#indices variaveis do jogador
+energia_v = habilidade_v = sorte_v = 0
+
+#poção jogador
+poção_base = ' '
+numero_poção = 0
+
+#nome global
+nome_jogador = ' '
 
 #confirmado de saida para tela inicial
 confirma_saida = 0
@@ -223,6 +235,7 @@ while True:
 
     elif Windows == janela_nome and eventos == 'Voltar':
         limita_botão_nome = 0
+        nome_jogador = ' '
         janela_intro = telas_iniciais.tela_intro()
         janela_nome.close()
     
@@ -240,9 +253,7 @@ while True:
         
         else:
             Windows['aviso1'].update('Nome Valido!')
-            cria_txt = open(r'.\ark_txt\user\Nome.txt', 'w', encoding='utf-8')
-            cria_txt.write(nome_gerado)
-            cria_txt.close()
+            nome_jogador = nome_gerado
 
             if limita_botão_nome == 0:
                 #cria botão na janela
@@ -254,6 +265,7 @@ while True:
     elif Windows == janela_nome and eventos == 'Começar':
         sg.user_settings_set_entry('-last position-', janela_nome.current_location())
         limita_botão_nome = 0
+        nome_jogador = ' '
         janela_dicas = telas_de_introdução.tela_dicas()
         janela_nome.close()
 
@@ -299,10 +311,6 @@ while True:
         break
 
     elif Windows == janela_boatos2 and eventos == 'Começar':
-        gerador_de_arquivos_txt.reseta_i_E()
-        gerador_de_arquivos_txt.reseta_i_H()
-        gerador_de_arquivos_txt.reseta_i_S()
-        gerador_de_arquivos_txt.reseta_p()
         gerador_de_arquivos_txt.reseta_mapa()
         sg.user_settings_set_entry('-last position-', janela_boatos2.current_location())
         janela_000 = telas_jogo_0_100.tela_000()
@@ -322,33 +330,24 @@ while True:
     #gera e valida os indices
 
     elif Windows == janela_000 and eventos == 'HABILIDADE':
-        limitador_h =int(open(r'.\ark_txt\ind\HAB_V.txt', 'r', encoding='utf-8').read())
-        
-        #Validação apartir do arquivo gerado do zero
 
-        if limitador_h <= 0:
+        #verifica se já foi gerado
+        if habilidade <= 0:
             numero_aleatorio = int(random.randint(1,6))
             soma_h = int(numero_aleatorio + 6)
 
             Windows['H'] .update(f'{numero_aleatorio}')
             Windows['S_H'] .update(f'= {soma_h}')
-            
-            arquivo0 = open(r'.\ark_txt\ind\HAB_V.txt', 'w', encoding='utf-8')
-            arquivo0.write(f'{soma_h}')
-            arquivo0.close()
 
-            arquivo1 = open(r'.\ark_txt\ind\HABILIDADE.txt', 'w', encoding='utf-8')
-            arquivo1.write(f'{soma_h}')
-            arquivo1.close()
+            habilidade = habilidade_v = soma_h
         
         else:
             Windows['aviso_indices'].update('Habilidade Já foi Gerada')
     
 
     elif Windows == janela_000 and eventos == 'ENERGIA':
-        limitador_e = int(open(r'.\ark_txt\ind\ENER_V.txt', 'r', encoding='utf-8').read())
 
-        if limitador_e <= 0:
+        if energia <= 0:
             numero_aleatorio1 = int(random.randint(1,6))
             numero_aleatorio2 = int(random.randint(1,6))
             soma_e = int((numero_aleatorio1 + numero_aleatorio2) + 12)
@@ -356,35 +355,22 @@ while True:
             Windows['E'] .update(f'{numero_aleatorio1 + numero_aleatorio2}')
             Windows['S_E'] .update(f'= {soma_e}')
 
-            arquivo0 = open(r'.\ark_txt\ind\ENER_V.txt', 'w', encoding='utf-8')
-            arquivo0.write(f'{soma_e}')
-            arquivo0.close()
-
-            arquivo1 = open(r'.\ark_txt\ind\ENERGIA.txt', 'w', encoding='utf-8')
-            arquivo1.write(f'{soma_e}')
-            arquivo1.close()
+            energia = energia_v = soma_e
         
         else:
             Windows['aviso_indices'].update('Energia Já foi Gerada')
         
 
     elif Windows == janela_000 and eventos == 'SORTE':
-        limitador_s = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
 
-        if limitador_s <= 0:
+        if sorte <= 0:
             numero_aleatorio = int(random.randint(1,6))
             soma_s = int(numero_aleatorio + 6)
 
             Windows['S'] .update(f'{numero_aleatorio}')
             Windows['S_S'] .update(f'= {soma_s}')
 
-            arquivo0 = open(r'.\ark_txt\ind\Sort_V.txt', 'w', encoding='utf-8')
-            arquivo0.write(f'{soma_s}')
-            arquivo0.close()
-
-            arquivo1 = open(r'.\ark_txt\ind\SORTE.txt', 'w', encoding='utf-8')
-            arquivo1.write(f'{soma_s}')
-            arquivo1.close()
+            sorte = sorte_v = soma_s
         
         else:
             Windows['aviso_indices'].update('Sorte Já foi Gerada')
@@ -392,11 +378,10 @@ while True:
     #gera e valida as poçoes
 
     elif Windows == janela_000 and eventos == 'P1':
-        limitador_P1 = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
         
-        if limitador_P1 <=0:
-            gerador_de_arquivos_txt.grava_pocao_habilidade()
-            gerador_de_arquivos_txt.grava_Provisoes()
+        if numero_poção <=0:
+            numero_poção = 2
+            poção_base = 'Poção Habilidade:'
             Windows['C_P'].update('Habilidade selecionada')
 
         else:
@@ -405,11 +390,10 @@ while True:
             
     
     elif Windows == janela_000 and eventos == 'P2':
-        limitador_P2 = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
 
-        if limitador_P2 <=0:
-            gerador_de_arquivos_txt.grava_pocao_forca()
-            gerador_de_arquivos_txt.grava_Provisoes()
+        if numero_poção <=0:
+            numero_poção = 2
+            poção_base = 'Poção Força:'
             Windows['C_P'].update('Força selecionada')
         
         else:
@@ -417,11 +401,10 @@ while True:
             Windows['aviso_pocao'].update('Poção já foi Gerada')
     
     elif Windows == janela_000 and eventos == 'P3':
-        limitador_P3 = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
 
-        if limitador_P3 <=0:
-            gerador_de_arquivos_txt.grava_pocao_fortuna()
-            gerador_de_arquivos_txt.grava_Provisoes()
+        if numero_poção <=0:
+            numero_poção = 2
+            poção_base = 'Poção Fortuna:'
             Windows['C_P'].update('Fortuna selecionada')
         
         else:
@@ -431,12 +414,9 @@ while True:
     #verifica se todos os itens foram gerados
 
     elif Windows == janela_000 and eventos == 'Estou pronto':
-        v_h = int(open(r'.\ark_txt\ind\HAB_V.txt', 'r', encoding='utf-8').read())
-        v_s = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
-        v_e = int(open(r'.\ark_txt\ind\ENER_V.txt', 'r', encoding='utf-8').read())
-        v_p = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
 
-        if v_e > 0 and v_h > 0 and v_p > 0 and v_s > 0:
+        if energia > 0 and habilidade > 0 and sorte > 0 and numero_poção > 0:
+            provisoes = 10
             sg.user_settings_set_entry('-last position-', janela_000.current_location())
             janela_001 = telas_jogo_0_100.tela_001()
             janela_000.close()
@@ -448,6 +428,10 @@ while True:
 
 
     elif Windows == janela_000 and eventos == 'Voltar':
+        energia = habilidade = sorte = provisoes = 0
+        energia_v = habilidade_v = sorte_v = 0
+        numero_poção = 0
+        poção_base = ' '
         sg.user_settings_set_entry('-last position-', janela_000.current_location())
         janela_boatos2 = telas_de_introdução.tela_boatos2()
         janela_000.close()
@@ -455,10 +439,10 @@ while True:
     #reseta todas as info
 
     elif Windows == janela_000 and eventos == 'Resetar':
-        gerador_de_arquivos_txt.reseta_i_E()
-        gerador_de_arquivos_txt.reseta_i_H()
-        gerador_de_arquivos_txt.reseta_i_S()
-        gerador_de_arquivos_txt.reseta_p()
+        energia = habilidade = sorte = provisoes = 0
+        energia_v = habilidade_v = sorte_v = 0
+        numero_poção = 0
+        poção_base = ' '
         janela_000.close()
         janela_000 = telas_jogo_0_100.tela_000()
 
@@ -497,7 +481,7 @@ while True:
 
     elif Windows == janela_mapa and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_mapa.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_mapa.close()
     
     elif Windows == janela_mapa and eventos == 'Sair':
@@ -599,7 +583,7 @@ while True:
 
     elif Windows == janela_001 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_001.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_001.hide()
         volta = janela_001
 
@@ -673,7 +657,7 @@ while True:
             
     elif Windows == janela_278_156 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_278_156.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_278_156.hide()
         volta = janela_278_156
  
@@ -684,7 +668,7 @@ while True:
 
     elif Windows == janela_343 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_343.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_343.hide()
         volta = janela_343
     
@@ -704,7 +688,7 @@ while True:
 
     elif Windows == janela_71 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_71.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_71.hide()
         volta = janela_71
     
@@ -780,7 +764,7 @@ while True:
 
     elif Windows == janela_92_71 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_92_71.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_92_71.hide()
         volta = janela_92_71
     
@@ -863,7 +847,7 @@ while True:
     
     elif Windows == janela_248 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_248.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_248.hide()
         volta = janela_248
     

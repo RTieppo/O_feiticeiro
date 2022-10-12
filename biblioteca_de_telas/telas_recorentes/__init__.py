@@ -2,6 +2,7 @@ from PySimpleGUI import PySimpleGUI as sg
 import pyglet
 from pyglet.libs.win32 import constants
 
+
 constants.COINIT_MULTITHREADED = 0x2
 
 pyglet.font.add_file(r'.\font\PixelOperator8-Bold.ttf')
@@ -14,7 +15,7 @@ font4 = ('Pixel Operator 8', 40)
 font5 = ('Pixel Operator SC', 20)
 font6 = ('Pixel Operator SC', 40)
 
-def tela_menu():
+def tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção):
     sg.theme('DarkAmber')
 
     layout=[
@@ -24,20 +25,15 @@ def tela_menu():
 
         [sg.Text('Indices', size=(550,0), justification='c', font=font3)],
 
-        [sg.Text('HABILIDADE: {} / {}'.format(open('ark_txt\ind\HABILIDADE.txt', 'r', encoding='utf-8').read(),
-        open('ark_txt\ind\HAB_V.txt', 'r', encoding='utf-8').read()) ,font=font2)],
+        [sg.Text(f'HABILIDADE: {habilidade} / {habilidade_v}',font=font2)],
 
-        [sg.Text('ENERGIA: {} / {}'.format(open('ark_txt\ind\ENERGIA.txt', 'r', encoding='utf-8').read(),
-        open('ark_txt\ind\ENER_V.txt', 'r', encoding='utf-8').read()),font=font2)],
+        [sg.Text(f'ENERGIA: {energia} / {energia_v}',font=font2)],
 
-        [sg.Text('SORTE: {} / {}'.format(open('ark_txt\ind\SORTE.txt', 'r', encoding='utf-8').read(),
-        open('ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read()),font=font2)],
+        [sg.Text(f'SORTE: {sorte} / {sorte_v}',font=font2)],
 
-        [sg.Text('{} / {}'.format(open('ark_txt\ind\Pocao.txt', 'r', encoding='utf-8').read(),
-        open('ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read() ),font=font2)],
+        [sg.Text(f'{poção_base} {numero_poção}',font=font2)],
 
-        [sg.Text('Provisôes:{} / {}'.format(open('ark_txt\ind\Provisoes.txt', 'r', encoding='utf-8').read(),
-        open('ark_txt\ind\Pro_v.txt', 'r', encoding='utf-8').read()),font=font2)],
+        [sg.Text(f'Provisôes:{provisoes}',font=font2)],
 
         [sg.Text('=-='*30, font=font2)],
 

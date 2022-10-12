@@ -6,9 +6,8 @@ import smtplib
 from email.message import EmailMessage
 from PySimpleGUI import PySimpleGUI as sg
 import time
-import os
 
-#funções complementares
+#Bibliotecas internas
 from biblioteca_de_telas import telas_iniciais
 from biblioteca_de_telas import telas_de_introdução
 from biblioteca_de_telas import telas_jogo_0_100
@@ -18,6 +17,7 @@ from biblioteca_de_telas import telas_jogo_301_400
 from biblioteca_de_telas import telas_recorentes
 from biblioteca_de_geradores import gerador_mapa
 from biblioteca_de_geradores import gerador_txt_user
+from biblioteca_de_geradores import gerador_de_dados
 from biblioteca_manipuladores import txt
 
 
@@ -540,58 +540,41 @@ while True:
     
     elif Windows == janela_278_156 and eventos == 'Derrubar':
         sg.user_settings_set_entry('-last position-', janela_278_156.current_location())
-        Habi = int(open(r'.\ark_txt\ind\HABILIDADE.txt', 'r', encoding='utf-8').read())
         Windows['Info0'] .update('Você bate contra aporta com o ombro.')
 
         #validação de indice de habilidade
 
-        if Habi > 0:
-            Habi = int(open(r'.\ark_txt\ind\HABILIDADE.txt', 'r', encoding='utf-8').read())
-            numero_aleatorio01 = int(random.randint(1,6))
-            numero_aleatorio02 = int(random.randint(1,6))
+        resultado_278_156 = gerador_de_dados.dado_duplo()
 
-            if numero_aleatorio01+numero_aleatorio02 <= Habi:
-                #jogador consegui derrubar a porta
-                Windows['info2'] .update('A Porta ABRIU!')
-                janela_278_156.refresh()
-
-                #Diminui Habilidade jogador
-                alterador_de_indices.menos_habilidade()
-
-                #grava local no mapa
-                gerador_mapa.grava_mapa('278-156 » ')
-
-                #vai para nova tela automatico
-                time.sleep(3)
-                janela_278_156.close()
-                janela_343 = telas_jogo_301_400.tela_343()
-                
-            elif numero_aleatorio01 + numero_aleatorio02 > Habi:
-                Windows['Info1'] .update('Você esfrega o ombro machucado \n  Resolvendo não tentar de novo.')
-                janela_278_156.refresh()
-                #jogador não consegui derrubar a porta muda de tela automatico
-
-                #grava local no mapa
-                gerador_mapa.grava_mapa('278-156 » ')
-
-                time.sleep(3)
-                #vai para nova tela automatico
-                janela_92_71 = telas_jogo_0_100.tela_92_71()
-                janela_278_156.close()
-                    
-        else:
-            #validação não foi valida
-            Windows['Info1'] .update('Você está muito fraco!')
+        if resultado_278_156 <= habilidade:
+            #jogador consegui derrubar a porta
+            Windows['info2'] .update('A Porta ABRIU!')
             janela_278_156.refresh()
-            
+
+            #Diminui Habilidade jogador
+            habilidade_v -= 1
+
             #grava local no mapa
             gerador_mapa.grava_mapa('278-156 » ')
 
-            time.sleep(2)
-
+            #vai para nova tela automatico
+            time.sleep(3)
             janela_278_156.close()
-            janela_92_71 = telas_jogo_0_100.tela_92_71()
+            janela_343 = telas_jogo_301_400.tela_343()
+            
+        elif resultado_278_156 > habilidade:
+            Windows['Info1'] .update('Você esfrega o ombro machucado \n  Resolvendo não tentar de novo.')
+            janela_278_156.refresh()
+            #jogador não consegui derrubar a porta muda de tela automatico
 
+            #grava local no mapa
+            gerador_mapa.grava_mapa('278-156 » ')
+
+            time.sleep(3)
+            #vai para nova tela automatico
+            janela_92_71 = telas_jogo_0_100.tela_92_71()
+            janela_278_156.close()
+                    
     elif Windows == janela_278_156 and eventos == 'Retornar':
         sg.user_settings_set_entry('-last position-', janela_278_156.current_location())
         

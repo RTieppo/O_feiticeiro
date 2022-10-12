@@ -2,7 +2,6 @@ from PySimpleGUI import PySimpleGUI as sg
 import pyglet
 from pyglet.libs.win32 import constants
 
-
 constants.COINIT_MULTITHREADED = 0x2
 
 pyglet.font.add_file(r'.\font\PixelOperator8-Bold.ttf')
@@ -56,7 +55,7 @@ def tela_mapa():
 
         [sg.Text('=-='*30, font=font2)],
 
-        [sg.Text(open(r'ark_txt\map\Mapa.txt', 'r', encoding='utf-8').read(), font=font2)],
+        [sg.Text(open(r'C:\Users\Public\O feiticeiro\Mapa.txt', 'r', encoding='utf-8').read(), font=font2)],
 
         [sg.Text('=-='*30, font=('Pixel Operator SC',15))],
 

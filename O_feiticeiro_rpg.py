@@ -16,13 +16,15 @@ from biblioteca_de_telas import telas_jogo_101_200
 from biblioteca_de_telas import telas_jogo_201_300
 from biblioteca_de_telas import telas_jogo_301_400
 from biblioteca_de_telas import telas_recorentes
+from biblioteca_de_geradores import gerador_mapa
+from biblioteca_de_geradores import gerador_txt_user
+from biblioteca_manipuladores import txt
+
 
 import dados
-import gerador_de_arquivos_txt
 import gerador_de_mostro
 import aplicador_de_dano
 import alterador_de_indices
-import gerador_mapa
 import efeitos_sonoros
 
 #puxafonte fora do sistema
@@ -131,8 +133,7 @@ while True:
         time.sleep(0.2)
         janela_nome = telas_de_introdução.tela_nome()
         janela_intro.close()
-        
-        
+           
     elif Windows == janela_intro and eventos == 'Regras':
         efeitos_sonoros.botão()
         time.sleep(0.2)
@@ -180,22 +181,18 @@ while True:
         arquivo = open(r'.\ark_txt\popup_t\sorte.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
         
-
     elif Windows == janela_regras and eventos == 'Inventário':
         arquivo = open(r'.\ark_txt\popup_t\inventario.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
-        
-        
+          
     elif Windows == janela_regras and eventos == 'Poções':
         arquivo = open(r'.\ark_txt\popup_t\poçoes.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
         
-
     elif Windows == janela_regras and eventos == 'Provisões':
         arquivo = open(r'.\ark_txt\popup_t\provisoes.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
         
-
 #janela Sugestão
 
     if Windows == janela_sugestao and eventos == sg.WIN_CLOSED:
@@ -311,7 +308,7 @@ while True:
         break
 
     elif Windows == janela_boatos2 and eventos == 'Começar':
-        gerador_de_arquivos_txt.reseta_mapa()
+        
         sg.user_settings_set_entry('-last position-', janela_boatos2.current_location())
         janela_000 = telas_jogo_0_100.tela_000()
         janela_boatos2.close()
@@ -321,12 +318,10 @@ while True:
         janela_boatos1 = telas_de_introdução.tela_boatos1()
         janela_boatos2.close()
 
-
 #janela 000 - gerador e validador de indices
 
     if Windows == janela_000 and eventos == sg.WIN_CLOSED:
         break
-
     #gera e valida os indices
 
     elif Windows == janela_000 and eventos == 'HABILIDADE':
@@ -388,7 +383,6 @@ while True:
             Windows['C_P'].update('')
             Windows['aviso_pocao'].update('Poção já foi Gerada')
             
-    
     elif Windows == janela_000 and eventos == 'P2':
 
         if numero_poção <=0:
@@ -417,6 +411,7 @@ while True:
 
         if energia > 0 and habilidade > 0 and sorte > 0 and numero_poção > 0:
             provisoes = 10
+            txt.valida_txt()
             sg.user_settings_set_entry('-last position-', janela_000.current_location())
             janela_001 = telas_jogo_0_100.tela_001()
             janela_000.close()
@@ -425,7 +420,6 @@ while True:
             Windows['C_P'].update('')
             Windows['aviso_pocao'].update('')
             Windows['aviso_validador'].update('Confira os indices e poções')
-
 
     elif Windows == janela_000 and eventos == 'Voltar':
         energia = habilidade = sorte = provisoes = 0
@@ -472,6 +466,10 @@ while True:
         else:
             janela_intro = telas_iniciais.tela_intro()
             confirma_saida = 0
+            energia = habilidade = sorte = provisoes = 0
+            energia_v = habilidade_v = sorte_v = 0
+            numero_poção = 0
+            poção_base = ' '
             janela_menu.close()
             volta.close()
 #janela Mapa
@@ -491,32 +489,8 @@ while True:
         janela_menu.close()
     
     elif Windows == janela_mapa and eventos == 'Salvar':
-        while True:
-            #indentifica user
-
-            sistema = os.environ
-            user = sistema['USERNAME']
-            
-            #Unifica user com caminho e gera lista
-            caminho1 = os.path.join(r'C:\Users',user,r'Documents')
-            validador = os.listdir(caminho1)
-
-            #caminho para criar a pasta 
-            caminho2 = os.path.join(caminho1,r'Save User')
-
-            #unifica caminho final e grava txt
-            caminho3 = os.path.join(caminho2,r'Mapa.txt')
-
-            if 'Save User' in validador:
-                save = open(r'.\ark_txt\map\Mapa.txt', 'r', encoding='utf-8').read()
-                criar_arquivo = open(caminho3, 'w', encoding='utf-8')
-                criar_arquivo.write(save)
-                criar_arquivo.close()
-                Windows['info'].update('Salvo em Documentos')
-                break
-
-            else:
-                os.makedirs(caminho2)
+        gerador_txt_user.save_mapa()
+        Windows['info'].update('Salvo em Documentos')
 
 #janela Morte
     if Windows == janela_morte and eventos == sg.WIN_CLOSED or Windows == janela_morte and eventos =='Sair':
@@ -526,36 +500,9 @@ while True:
         janela_intro = telas_iniciais.tela_intro()
         janela_morte.close()
     
-
     elif Windows == janela_morte and eventos == '-Salva-':
-        while True:
-            #indentifica user
-
-            sistema = os.environ
-            user = sistema['USERNAME']
-            
-            #Unifica user com caminho e gera lista
-            caminho1 = os.path.join(r'C:\Users',user,r'Documents')
-            validador = os.listdir(caminho1)
-
-            #caminho para criar a pasta 
-            caminho2 = os.path.join(caminho1,r'Save User')
-
-            #unifica caminho final e grava txt
-            caminho3 = os.path.join(caminho2,r'Mapa.txt')
-
-            if 'Save User' in validador:
-                save = open(r'.\ark_txt\map\Mapa.txt', 'r', encoding='utf-8').read()
-                criar_arquivo = open(caminho3, 'w', encoding='utf-8')
-                criar_arquivo.write(save)
-                criar_arquivo.close()
-                Windows['-aviso_save-'].update('Salvo em Documentos')
-                break
-
-            else:
-                os.makedirs(caminho2)
-
-#janelas recorentes fim
+        gerador_txt_user.save_mapa()
+        Windows['-aviso_save-'].update('Salvo em Documentos')
 
 #janela 001
 
@@ -566,8 +513,7 @@ while True:
         local = sg.user_settings_set_entry('-last position-', janela_001.current_location())
         
         #Grava mapa
-        gerador_mapa.mapa_tela_001()
-
+        gerador_mapa.grava_mapa('001 » ')
         janela_71 = telas_jogo_0_100.tela_71()
         janela_001.close()
         
@@ -576,7 +522,7 @@ while True:
         local = sg.user_settings_set_entry('-last position-', janela_001.current_location())
         
         #Grava mapa
-        gerador_mapa.mapa_tela_001()
+        gerador_mapa.grava_mapa('001 » ')
 
         janela_278_156 = telas_jogo_201_300.tela_278_156()
         janela_001.close()
@@ -613,7 +559,7 @@ while True:
                 alterador_de_indices.menos_habilidade()
 
                 #grava local no mapa
-                gerador_mapa.mapa_tela_278_156()
+                gerador_mapa.grava_mapa('278-156 » ')
 
                 #vai para nova tela automatico
                 time.sleep(3)
@@ -626,7 +572,7 @@ while True:
                 #jogador não consegui derrubar a porta muda de tela automatico
 
                 #grava local no mapa
-                gerador_mapa.mapa_tela_278_156()
+                gerador_mapa.grava_mapa('278-156 » ')
 
                 time.sleep(3)
                 #vai para nova tela automatico
@@ -639,7 +585,7 @@ while True:
             janela_278_156.refresh()
             
             #grava local no mapa
-            gerador_mapa.mapa_tela_278_156()
+            gerador_mapa.grava_mapa('278-156 » ')
 
             time.sleep(2)
 
@@ -650,7 +596,7 @@ while True:
         sg.user_settings_set_entry('-last position-', janela_278_156.current_location())
         
         #grava local no mapa
-        gerador_mapa.mapa_tela_278_156()
+        gerador_mapa.grava_mapa('278-156 » ')
         
         janela_92_71 = telas_jogo_0_100.tela_92_71()
         janela_278_156.close()
@@ -676,7 +622,7 @@ while True:
         sg.user_settings_set_entry('-last position-', janela_343.current_location())
         
         #grava local no mapa
-        gerador_mapa.mapa_tela_343()
+        gerador_mapa.grava_mapa('343 » ')
 
         janela_92_71 = telas_jogo_0_100.tela_92_71()
         janela_343.close()
@@ -711,7 +657,7 @@ while True:
                 alterador_de_indices.menos_sorte()
 
                 #grava local no mapa
-                gerador_mapa.mapa_tela_71()
+                gerador_mapa.grava_mapa('71 » ')
                 
                 time.sleep(3)
                 #criar ação - em produção
@@ -727,7 +673,7 @@ while True:
                 alterador_de_indices.menos_sorte()
 
                 #grava local no mapa
-                gerador_mapa.mapa_tela_71()
+                gerador_mapa.grava_mapa('71 » ')
 
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
@@ -748,7 +694,7 @@ while True:
             alterador_de_indices.menos_sorte()
 
             #grava local no mapa
-            gerador_mapa.mapa_tela_71()
+            gerador_mapa.grava_mapa('71 » ')
 
             #pausa a tela para leitura da informação apresentada
             #depois troca a tela
@@ -788,7 +734,7 @@ while True:
                 alterador_de_indices.menos_sorte()
 
                 #grava local no mapa
-                gerador_mapa.mapa_tela_92_71()
+                gerador_mapa.grava_mapa('92-71 »')
                 
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
@@ -809,7 +755,7 @@ while True:
                 gerador_de_mostro.orc01()
 
                 #grava local no mapa
-                gerador_mapa.mapa_tela_92_71()
+                gerador_mapa.grava_mapa('92-71 »')
 
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
@@ -832,7 +778,7 @@ while True:
             gerador_de_mostro.orc01()
 
             #grava local no mapa
-            gerador_mapa.mapa_tela_92_71()
+            gerador_mapa.grava_mapa('92-71 »')
 
             #pausa a tela para leitura da informação apresentada
             #depois troca a tela
@@ -935,7 +881,7 @@ while True:
                         #troca de tela automaticamente com tempo de leitura para o jogador
                         Windows['causa'] .update('Criatura foi morta')
                         sg.user_settings_set_entry('-last position-', janela_248.current_location())
-                        gerador_mapa.mapa_tela_248()
+                        gerador_mapa.grava_mapa('248 »')
                         #limita_botao_sorte = 0
                         #resultado_batalha = ' '
                         #ativação_botão_sorte = 0

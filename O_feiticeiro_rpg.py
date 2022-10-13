@@ -19,10 +19,8 @@ from biblioteca_de_geradores import gerador_mapa
 from biblioteca_de_geradores import gerador_txt_user
 from biblioteca_de_geradores import gerador_de_dados
 from biblioteca_manipuladores import txt
-
-
 import dados
-import gerador_de_mostro
+
 import aplicador_de_dano
 import alterador_de_indices
 import efeitos_sonoros
@@ -73,6 +71,10 @@ energia_v = habilidade_v = sorte_v = 0
 #poção jogador
 poção_base = ' '
 numero_poção = 0
+
+#indeces mostrons
+mostro_1_V = mostro_2_V = mostro_3_V = mostro_4_V = 0
+mostro_1_H = mostro_2_H = mostro_3_H = mostro_4_H = 0
 
 #nome global
 nome_jogador = ' '
@@ -262,7 +264,6 @@ while True:
     elif Windows == janela_nome and eventos == 'Começar':
         sg.user_settings_set_entry('-last position-', janela_nome.current_location())
         limita_botão_nome = 0
-        nome_jogador = ' '
         janela_dicas = telas_de_introdução.tela_dicas()
         janela_nome.close()
 
@@ -623,29 +624,23 @@ while True:
     
     elif Windows == janela_71 and eventos == 'Testar':
         sg.user_settings_set_entry('-last position-', janela_71.current_location())
-        sorte = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
         
         #validando a sorte
+        if sorte_v > 0:
+            resultado_71 = gerador_de_dados.dado_duplo()
 
-        if sorte > 0:
-            numero_aleatorio1 = int(random.randint(1,6))
-            numero_aleatorio2 = int(random.randint(1,6))
-
-            if numero_aleatorio1 + numero_aleatorio2 <= sorte:
+            if resultado_71 <= sorte_v:
                 Windows['S1'].update('A Criatura não acordou!')
                 Windows['S2'].update('Você perdeu 1 ponto de sorte')
                 janela_71.refresh()
-
                 #sorte ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
                 #grava local no mapa
                 gerador_mapa.grava_mapa('71 » ')
-                
                 time.sleep(3)
                 #criar ação - em produção
                
-            elif numero_aleatorio1 + numero_aleatorio2 > sorte:
+            elif resultado_71> sorte_v:
                 #informa o jogador e atualiza a tela
                 Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
                 '\nOs olhos do ser se abrem instantaneamente')
@@ -653,16 +648,17 @@ while True:
                 janela_71.refresh()
                 
                 #sorte não ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
+                mostro_1_V = 5
+                mostro_1_H = 6
                 #grava local no mapa
                 gerador_mapa.grava_mapa('71 » ')
-
+                
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
 
                 time.sleep(3)
-                janela_248 = telas_jogo_201_300.tela_248()
+                janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
                 janela_71.close()
 
         else:
@@ -670,20 +666,16 @@ while True:
             #informa o jogador e atualiza a tela
             Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
             '\nOs olhos do ser se abrem instantaneamente')
-            Windows['S3'].update('Menos 1 ponto de Sorte\n        Hora de Lutar!')
+            Windows['S3'].update('Hora de Lutar!'.center())
             janela_71.refresh()
-            
-            #sorte não ajudou o jogador - diminui sorte variavel
-            alterador_de_indices.menos_sorte()
-
             #grava local no mapa
+            mostro_1_V = 5
+            mostro_1_H = 6
             gerador_mapa.grava_mapa('71 » ')
-
             #pausa a tela para leitura da informação apresentada
             #depois troca a tela
-
             time.sleep(3)
-            janela_248 = telas_jogo_201_300.tela_248()
+            janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
             janela_71.close()
 
 # janela 92_71
@@ -699,23 +691,20 @@ while True:
     
     elif Windows == janela_92_71 and eventos == 'Testar':
         sg.user_settings_set_entry('-last position-', janela_92_71.current_location())
-        sorte = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
-        
+
         #validando a sorte
 
-        if sorte > 0:
-            numero_aleatorio1 = int(random.randint(1,6))
-            numero_aleatorio2 = int(random.randint(1,6))
+        if sorte_v > 0:
+            resultado_92_71 = gerador_de_dados.dado_duplo()
 
-            if numero_aleatorio1 + numero_aleatorio2 <= sorte:
+            if resultado_92_71 <= sorte_v:
                 #informa o jogador e atualiza a tela
                 Windows['S1'].update('A Criatura não acordou!')
                 Windows['S2'].update('Você perdeu 1 ponto de sorte')
                 janela_92_71.refresh()
 
                 #sorte ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
                 #grava local no mapa
                 gerador_mapa.grava_mapa('92-71 »')
                 
@@ -724,7 +713,7 @@ while True:
                 time.sleep(3)
                 #criar ação - tela em criação
             
-            elif numero_aleatorio1 + numero_aleatorio2 > sorte:
+            elif resultado_92_71 > sorte_v:
                 #informa o jogador e atualiza a tela
                 Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
                 '\nOs olhos do ser se abrem instantaneamente')
@@ -732,10 +721,10 @@ while True:
                 janela_92_71.refresh()
 
                 #sorte não ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
+                mostro_1_V = 5
+                mostro_1_H = 6
                 #gera mostro para a luta
-                gerador_de_mostro.orc01()
 
                 #grava local no mapa
                 gerador_mapa.grava_mapa('92-71 »')
@@ -743,7 +732,7 @@ while True:
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
                 time.sleep(3)
-                janela_248 = telas_jogo_201_300.tela_248()
+                janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
                 janela_92_71.close()
 
         else:
@@ -751,22 +740,19 @@ while True:
             #informa o jogador e atualiza a tela
             Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
             '\nOs olhos do ser se abrem instantaneamente')
-            Windows['S3'].update('Menos 1 ponto de Sorte\n        Hora de Lutar!')
+            Windows['S3'].update('Hora de Lutar!')
             janela_92_71.refresh()
 
-            #sorte não ajudou o jogador - diminui sorte variavel
-            alterador_de_indices.menos_sorte()
-
             #gera mostro para a luta
-            gerador_de_mostro.orc01()
-
+            mostro_1_V = 5
+            mostro_1_H = 6
             #grava local no mapa
             gerador_mapa.grava_mapa('92-71 »')
 
             #pausa a tela para leitura da informação apresentada
             #depois troca a tela
             time.sleep(3)
-            janela_248 = telas_jogo_201_300.tela_248()
+            janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
             janela_92_71.close()
     
 #janela 248 combate

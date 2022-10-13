@@ -39,7 +39,7 @@ def tela_278_156():
     return sg.Window('',size=(550,850),border_depth=(-15),layout=layout, finalize=True, element_justification='c',
     icon='Icon\Sabio.ico', location=tuple(sg.user_settings_get_entry('-last position-', (None, None))))
     
-def tela_248():
+def tela_248(nome_jogador,mostro_1_H):
     sg.theme('DarkAmber')
 
     layout=[
@@ -49,9 +49,9 @@ def tela_248():
 
         [sg.Text('ORC NV1', font=font5, justification='c', text_color='green')],
 
-        [sg.Text('HABILIDADE - 6', font=font5, justification='c')],
-
-        [sg.Text(open(r'.\ark_txt\user\Nome.txt', 'r', encoding='utf-8').read(), font=font5),
+        [sg.Text(f'HABILIDADE - {mostro_1_H}', font=font5, justification='c')],
+        
+        [sg.Text(f'{nome_jogador}', font=font5),
         sg.Text('', key='-dano_jogador-', font=font5, text_color='red'),
         sg.Text('VS', font=font5),
         sg.Text('', key='-dano_mostro-', font=font5, text_color='red'),

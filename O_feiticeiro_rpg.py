@@ -19,10 +19,10 @@ from biblioteca_de_geradores import gerador_mapa
 from biblioteca_de_geradores import gerador_txt_user
 from biblioteca_de_geradores import gerador_de_dados
 from biblioteca_manipuladores import txt
-import dados
+from biblioteca_combate import combate_gerais
+from biblioteca_combate import sorte_combate
 
-import aplicador_de_dano
-import alterador_de_indices
+import dados
 import efeitos_sonoros
 
 #puxafonte fora do sistema
@@ -57,10 +57,7 @@ volta = None
 limita_botão_nome = limita_botao_sorte = 0
 
 #ativação de botão
-ativação_botão_sorte = 0
-
-#variaveis de combate
-resultado_batalha = ' '
+ativação_botão_sorte = False
 
 #indices base do jogador
 energia = habilidade = sorte = provisoes = 0
@@ -288,10 +285,6 @@ while True:
     if Windows == janela_boatos1 and eventos == sg.WIN_CLOSED:
         break
 
-    elif Windows == janela_boatos1 and eventos == 'Sair':
-        janela_boatos1.close()
-        break
-
     elif Windows == janela_boatos1 and eventos == 'Próximo':
         sg.user_settings_set_entry('-last position-', janela_boatos1.current_location())
         janela_boatos2 = telas_de_introdução.tela_boatos2()
@@ -301,7 +294,6 @@ while True:
         sg.user_settings_set_entry('-last position-', janela_boatos1.current_location())
         janela_dicas = telas_de_introdução.tela_dicas()
         janela_boatos1.close()
-
 
 #janela de boatos2
 
@@ -325,6 +317,8 @@ while True:
         break
     #gera e valida os indices
 
+    
+
     elif Windows == janela_000 and eventos == 'HABILIDADE':
 
         #verifica se já foi gerado
@@ -340,7 +334,6 @@ while True:
         else:
             Windows['aviso_indices'].update('Habilidade Já foi Gerada')
     
-
     elif Windows == janela_000 and eventos == 'ENERGIA':
 
         if energia <= 0:
@@ -356,7 +349,6 @@ while True:
         else:
             Windows['aviso_indices'].update('Energia Já foi Gerada')
         
-
     elif Windows == janela_000 and eventos == 'SORTE':
 
         if sorte <= 0:
@@ -773,98 +765,60 @@ while True:
         Windows['Sofre'] .update('')
         Windows['-dano_mostro-'] .update('')
         Windows['-dano_jogador-'] .update('')
+        ativação_botão_sorte = False
 
-        #abre vida jogador para validação
-        valida_energia_jogador = int(open(r'.\ark_txt\ind\ENER_V.txt','r', encoding='utf-8').read())
+        atk = combate_gerais.combateX1(energia_v,mostro_1_V,habilidade_v,mostro_1_H)
 
-         #abre vida da criatura
-        abre_vida_criatura = int(open(r'.\ark_txt\Batalha\orca.txt', 'r', encoding='utf-8').read())
+        if  limita_botao_sorte == 0:
+            #adicona botão sorte e trava a criação de novos botoes 
+            janela_248.extend_layout(janela_248['-botao_sorte-'],
+            [[sg.Button('Sorte',font=font2)]])
+            limita_botao_sorte += 1
+            #reseta ativação do botão sorte
+            ativação_botão_sorte = False
         
-        #valida vida jogador
-        if valida_energia_jogador > 0:
+        if atk[0] == 'Dano causado':
+            Windows['causa'] .update(atk[0])
+            #Mostra as informações da batalha para o jogador 
+            Windows['-dano_mostro-'] .update(atk[1])
+            Windows['-dano_jogador-'] .update(atk[2])
+            
+            #Atualiza vida da criatura e aplica dano normal
+            mostro_1_V -= 2
+        
+        elif atk[0] == 'Dano Sofrido':
+            Windows['Sofre'] .update(atk[0])
+            #Mostra as informações da batalha para o jogador 
+            Windows['-dano_mostro-'] .update(atk[1])
+            Windows['-dano_jogador-'] .update(atk[2])
 
-            #valida vida do mostro
-            if abre_vida_criatura > 0:
+            #atualiza vida do jogador
+            energia_v -= 2
+        
+        elif atk[0]== 'Esquiva':
+            Windows['Empate'] .update(atk[0])
+            #aplica informações na tela
+            Windows['-dano_mostro-'] .update(atk[1])
+            Windows['-dano_jogador-'] .update(atk[2])
 
-                #Abre aquivo para a validação da sorte e criação do botão
-                valida_sorte = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r',encoding='utf-8').read())
-                
-                if valida_sorte > limita_botao_sorte:
-                    #adicona botão sorte e trava a criação de novos botoes 
-                    janela_248.extend_layout(janela_248['-botao_sorte-'],
-                    [[sg.Button('Sorte',font=font2)]])
-                    limita_botao_sorte += 30
-                
-                #reseta ativação do botão sorte
-                ativação_botão_sorte = 0
-                
-                #Gera a força do jogador e do mostro
-                força_user01 = int(random.randint(1,6))
-                força_user02 = int(random.randint(1,6))
+        elif atk == 'Criatura foi morta':
+            #informa jogador a morte de mostro reseta variaveis de combate
+            #troca de tela automaticamente com tempo de leitura para o jogador
+            Windows['causa'] .update(atk)
+            sg.user_settings_set_entry('-last position-', janela_248.current_location())
+            gerador_mapa.grava_mapa('248 »')
+            #limita_botao_sorte = 0
+            #ativação_botão_sorte = False
+            #liberar limitadores na alfa de test
+            #criar ação depois da morte da criatura - em criação
 
-                força_mostro01 = int(random.randint(1,6))
-                força_mostro02 = int(random.randint(1,6))
+        elif atk == 'Você foi morto':
+            #jogador morreu informa e grava no mapa
+            Windows['Sofre'] .update(atk)
+            gerador_mapa.morte_jogador()
+            janela_morte = telas_recorentes.tela_morte()
+            janela_248.close()
 
-                #abre habilidade variavel 
-                Habilidade_variavel = int(open(r'.\ark_txt\ind\HAB_V.txt','r', encoding='utf-8').read())
-
-                #soma força final
-                soma_força_user = força_user01 + força_user02 + Habilidade_variavel
-                soma_força_mostro = força_mostro01 + força_mostro02 + 6
-
-                if soma_força_user > soma_força_mostro:
-
-                    Windows['causa'] .update('Dano Causado')
-                    #Mostra as informações da batalha para o jogador 
-                    Windows['-dano_mostro-'] .update(soma_força_mostro)
-                    Windows['-dano_jogador-'] .update(soma_força_user)
-
-                    #grava resultado de combate para aplicar na sorte
-                    resultado_batalha = 'Dano_causado'
-                    
-                    #Atualiza vida da criatura e aplica dano normal
-                    aplicador_de_dano.dano_aumentado_normal()
-                    
-                elif soma_força_user < soma_força_mostro:
-
-                    Windows['Sofre'] .update('Dano Sofrido')
-                    #Mostra as informações da batalha para o jogador 
-                    Windows['-dano_mostro-'] .update(soma_força_mostro)
-                    Windows['-dano_jogador-'] .update(soma_força_user)
-
-                    #grava resultado de combate para aplicar na sorte
-                    resultado_batalha = 'Dano_sofrido'
-
-                    #atualiza vida do jogador
-                    aplicador_de_dano.dano_normal_recebido()
-                    
-
-                else:
-                    Windows['Empate'] .update('Esquiva')
-                    #aplica informações na tela
-                    Windows['-dano_mostro-'] .update(soma_força_mostro)
-                    Windows['-dano_jogador-'] .update(soma_força_user)
-
-            else:
-                        #informa jogador a morte de mostro reseta variaveis de combate
-                        #troca de tela automaticamente com tempo de leitura para o jogador
-                        Windows['causa'] .update('Criatura foi morta')
-                        sg.user_settings_set_entry('-last position-', janela_248.current_location())
-                        gerador_mapa.grava_mapa('248 »')
-                        #limita_botao_sorte = 0
-                        #resultado_batalha = ' '
-                        #ativação_botão_sorte = 0
-
-                        #liberar limitadores na alfa de test
-                        #criar ação depois da morte da criatura - em criação
-
-        else:
-                    #jogador morreu informa e grava no mapa
-                    Windows['Sofre'] .update('Você foi morto')
-                    gerador_mapa.morte_jogador()
-                    janela_morte = telas_recorentes.tela_morte()
-                    janela_248.close()
-    
     #ajusta uso da sorte e apresentação das informações para o jogador
     elif Windows == janela_248 and eventos == 'Sorte':
         #limpa informação da tela
@@ -874,61 +828,33 @@ while True:
         Windows['-dano_mostro-'] .update('')
         Windows['-dano_jogador-'] .update('')
 
-        #faz nova leitura dos arquivos para aplicar a sorte
-        vida_jogador = int(open(r'.\ark_txt\ind\ENER_V.txt', 'r', encoding='utf-8').read())
-        vida_criatura = int(open(r'.\ark_txt\Batalha\orca.txt', 'r', encoding='utf-8').read())
-        alterador_de_sorte_e_validador = int(open(r'.\ark_txt\ind\Sort_V.txt','r', encoding='utf-8').read())
-       
-        #validação se o botão sorte já foi usado
-        if ativação_botão_sorte <= 0:
+        usou_sorte = sorte_combate.uso_de_sorte(ativação_botão_sorte,sorte_v,atk)
 
-            #validação se jogador ainda tem sorte
-            if alterador_de_sorte_e_validador > 0:
-
-                #gerador de comparação de sorte
-                teste_sorte1 = int(random.randint(1,6))
-                teste_sorte2 = int(random.randint(1,6))
-
-                # ajusta sorte assim que usada
-                alterador_de_indices.menos_sorte()
-    
-                if resultado_batalha == 'Dano_causado':
-
-                    if alterador_de_sorte_e_validador > teste_sorte1 + teste_sorte2:
-                        #sorte ajudou jogador 
-                        Windows['causa'] .update('Dano ampliado')
-                        ativação_botão_sorte += 1
-                        #aplica dano aumentado
-                        aplicador_de_dano.dano_aumentado_normal()
-                        
-                    else:
-                        #sorte não ajudou na batalha
-                        Windows['Empate'] .update('Dano reduzido')
-                        ativação_botão_sorte += 1
-                        #Reduz dano normal
-                        aplicador_de_dano.dano_reduzido()
-                        
-                elif resultado_batalha == 'Dano_sofrido':
-                    #jogador teve sorte e dano foi reduzido
-                    if alterador_de_sorte_e_validador  > teste_sorte1 + teste_sorte2:
-                        Windows['causa'] .update('Sangramento contido')
-                        ativação_botão_sorte += 1
-                        aplicador_de_dano.conteve_sangramento()
-                        
-                    #jogador não teve sorte dano foi aumentado
-                    else:
-                        Windows['Sofre'] .update('Sangramento aumentado')
-                        ativação_botão_sorte += 1
-                        aplicador_de_dano.sangramento_aumentado()
-
-                #jogador e mostro tem força igual, sorte não é aplicavel      
-                else:
-                    Windows['Empate'] .update('sorte não aplicavel')
-            
-            #jogador esgotou a sorte
-            else:
-                Windows['Sofre'] .update('Sorte Esgotada')
+        if usou_sorte == 'Dano ampliado':
+            Windows['causa'] .update(usou_sorte)
+            mostro_1_V -= 2
+            ativação_botão_sorte = True
         
-        #sorte já foi usada naquela rodada
+        elif usou_sorte == 'Dano reduzido':
+            Windows['Empate'] .update(usou_sorte)
+            mostro_1_V -= 1
+            ativação_botão_sorte = True
+        
+        elif usou_sorte == 'Sangramento contido':
+            Windows['causa'] .update(usou_sorte)
+            ativação_botão_sorte = True
+            energia_v += 1
+        
+        elif usou_sorte == 'Sangramento aumentado':
+            Windows['Sofre'] .update(usou_sorte)
+            ativação_botão_sorte = True
+            energia_v -= 1
+        
+        elif usou_sorte == 'sorte não aplicavel':
+            Windows['Empate'] .update(usou_sorte)
+        
+        elif usou_sorte == 'Sorte Esgotada':
+            Windows['Sofre'] .update(usou_sorte)
+        
         else:
             Windows['Empate'] .update('sorte já usada')

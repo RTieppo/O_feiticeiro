@@ -1,9 +1,6 @@
 #Bibliotecas Extras
 import pyglet
 from pyglet.libs.win32 import constants
-import random
-import smtplib
-from email.message import EmailMessage
 from PySimpleGUI import PySimpleGUI as sg
 import time
 
@@ -21,8 +18,8 @@ from biblioteca_de_geradores import gerador_de_dados
 from biblioteca_manipuladores import txt
 from biblioteca_combate import combate_gerais
 from biblioteca_combate import sorte_combate
+from externas import email
 
-import dados
 import efeitos_sonoros
 
 #puxafonte fora do sistema
@@ -89,7 +86,6 @@ while True:
 
     Windows,eventos,valores = sg.read_all_windows(timeout= 1000)
     
-
     if janela_abertura and eventos == sg.TIMEOUT_EVENT:
 
         if abertura < 1:
@@ -119,8 +115,7 @@ while True:
                 janela_intro = telas_iniciais.tela_intro()
                 janela_abertura.close()
                 abertura += 1
-                break
-
+                
 #Janelaintro
 
     if Windows == janela_intro and eventos == sg.WIN_CLOSED or Windows == janela_intro and eventos == 'Sair':
@@ -202,27 +197,15 @@ while True:
         janela_sugestao.close()
     
     elif Windows == janela_sugestao and eventos == 'Enviar':
-        EMAIL_ADDRESS = dados.Email
-        EMAIL_PASSWORD = dados.Senha
-        texto_user = valores['usertexto']
-    
-        msg = EmailMessage()
-        msg['subject'] = 'Sugestões'
-        msg['From'] = dados.Email
-        msg['To'] = dados.Email
-        msg.set_content(texto_user)
+        Windows['mensagem'] .update('Enviando...')
+        Windows.refresh()
+        envio = email.envio(valores['usertexto'])
 
-        try:
-            with smtplib.SMTP_SSL('smtp.gmail.com',465) as smtp:
-                smtp.login(EMAIL_ADDRESS,EMAIL_PASSWORD)
-                smtp.send_message(msg)
-                Windows['mensagem'] .update('Sugestão Enviada! \n Obrigado!')
+        if envio == True:
+            Windows['mensagem'] .update('Sugestão Enviada! \n Obrigado!')
         
-        except TimeoutError as erro1:
-            Windows['mensagem'].update('Verifiqeu sua conecção')
-            
-        except Exception as erro2:
-            sg.popup_error(erro2, no_titlebar= True)
+        elif envio == 'Verifiqeu sua conexão!':
+            Windows['mensagem'].update(envio)
 
 #Janela Nome
 
@@ -317,13 +300,12 @@ while True:
         break
     #gera e valida os indices
 
-    
-
     elif Windows == janela_000 and eventos == 'HABILIDADE':
 
         #verifica se já foi gerado
         if habilidade <= 0:
-            numero_aleatorio = int(random.randint(1,6))
+
+            numero_aleatorio = gerador_de_dados.dado_unico()
             soma_h = int(numero_aleatorio + 6)
 
             Windows['H'] .update(f'{numero_aleatorio}')
@@ -337,11 +319,10 @@ while True:
     elif Windows == janela_000 and eventos == 'ENERGIA':
 
         if energia <= 0:
-            numero_aleatorio1 = int(random.randint(1,6))
-            numero_aleatorio2 = int(random.randint(1,6))
-            soma_e = int((numero_aleatorio1 + numero_aleatorio2) + 12)
+            numero_aleatorio = gerador_de_dados.dado_duplo()
+            soma_e = numero_aleatorio + 12
 
-            Windows['E'] .update(f'{numero_aleatorio1 + numero_aleatorio2}')
+            Windows['E'] .update(f'{numero_aleatorio}')
             Windows['S_E'] .update(f'= {soma_e}')
 
             energia = energia_v = soma_e
@@ -352,7 +333,7 @@ while True:
     elif Windows == janela_000 and eventos == 'SORTE':
 
         if sorte <= 0:
-            numero_aleatorio = int(random.randint(1,6))
+            numero_aleatorio = gerador_de_dados.dado_unico()
             soma_s = int(numero_aleatorio + 6)
 
             Windows['S'] .update(f'{numero_aleatorio}')

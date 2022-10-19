@@ -1,0 +1,15 @@
+    Logo no início de sua jornada você vai escolher
+entre 3 opções de poções para levar em sua jornada,
+então escolha com sabedoria pois você terá dois
+frascos da poção escolhida, durante a jornada pode
+ser que você encontre alguma extra.
+
+Poção da Habilidade - recupera totalmente seu
+índice de Habilidade
+
+Poção da Força - recupera totalmente seu índice
+de Energia;
+
+Poção da Fortuna - recupera totalmente o seu
+índice de Sorte e acrescenta 1 ponto à mais ao
+seu índice de sorte inicial.

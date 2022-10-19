@@ -24,11 +24,6 @@ from biblioteca_manipuladores import txt
 from biblioteca_combate import combate_gerais
 from biblioteca_combate import sorte_combate
 
-import dados
-
-import aplicador_de_dano
-import alterador_de_indices
-
 
 #puxafonte fora do sistema
 constants.COINIT_MULTITHREADED = 0x2
@@ -69,8 +64,8 @@ poção_base = ' '
 numero_poção = 5
 
 #indeces mostrons
-mostro_1_V  = 5
-mostro_1_H = 5
+mostro_1_V  = 1000
+mostro_1_H = 10
 
 #nome global
 nome_jogador = 'eu'

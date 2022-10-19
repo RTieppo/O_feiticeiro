@@ -134,8 +134,8 @@ while True:
         janela_regras = telas_iniciais.tela_regras()
         janela_intro.close()
 
-    elif Windows == janela_intro and eventos == 'Biblioteca de mostros':
-        pass
+    elif Windows == janela_intro and eventos == 'Biblioteca':
+        sg.popup_no_titlebar('Em breve!', font=font2)
         #criar ação
 
     elif Windows == janela_intro and eventos == 'Créditos':
@@ -597,6 +597,7 @@ while True:
     
     elif Windows == janela_71 and eventos == 'Testar':
         sg.user_settings_set_entry('-last position-', janela_71.current_location())
+        sorte_v = 3 #remover depois
         
         #validando a sorte
         if sorte_v > 0:
@@ -622,7 +623,7 @@ while True:
                 
                 #sorte não ajudou o jogador - diminui sorte variavel
                 sorte_v -= 1
-                mostro_1_V = 5
+                mostro_1_V = 1000 #voltar para 5 depois do test
                 mostro_1_H = 6
                 #grava local no mapa
                 gerador_mapa.grava_mapa('71 » ')
@@ -642,7 +643,7 @@ while True:
             Windows['S3'].update('Hora de Lutar!'.center())
             janela_71.refresh()
             #grava local no mapa
-            mostro_1_V = 5
+            mostro_1_V = 1000 #voltar para 5 depois do test
             mostro_1_H = 6
             gerador_mapa.grava_mapa('71 » ')
             #pausa a tela para leitura da informação apresentada
@@ -664,6 +665,7 @@ while True:
     
     elif Windows == janela_92_71 and eventos == 'Testar':
         sg.user_settings_set_entry('-last position-', janela_92_71.current_location())
+        sorte_v = 3 #remover depois
 
         #validando a sorte
 
@@ -695,7 +697,7 @@ while True:
 
                 #sorte não ajudou o jogador - diminui sorte variavel
                 sorte_v -= 1
-                mostro_1_V = 5
+                mostro_1_V = 1000 #voltar para 5 depois do test
                 mostro_1_H = 6
                 #gera mostro para a luta
 
@@ -717,7 +719,7 @@ while True:
             janela_92_71.refresh()
 
             #gera mostro para a luta
-            mostro_1_V = 5
+            mostro_1_V = 1000 #voltar para 5 depois do test
             mostro_1_H = 6
             #grava local no mapa
             gerador_mapa.grava_mapa('92-71 »')

@@ -1,0 +1,10 @@
+    Conforme você vai avançando em sua jornada algumas
+batalhas serão inevitáveis os monstros em seu caminho,
+tem sua força gerada de forma aleatória enquanto o
+nível de energia do monstro já está definido.
+
+    A batalha vai acontecer em turnos, para cada ataque
+bem sucedido o monstro perde 2 pontos de energia. Para
+cada ataque bem sucedido do monstros ele causa dois de
+dano em você em caso de empate, nem você nem o monstro
+recebem dano.

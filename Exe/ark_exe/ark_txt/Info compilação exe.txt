@@ -1,0 +1,1 @@
+pyinstaller O_feiticeiro_rpg.py --upx-dir C:\Users\Tieppo\Desktop\RPG\upx --noconsole --name="Feiticeiro" --icon="Icon\Sabio.ico" --add-data="Icon\Sabio.ico;." -F

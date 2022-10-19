@@ -1,0 +1,10 @@
+    Sua sorte vai ser testada em várias ocasiões como
+batalhas, eventos aleatórios e durante algumas ações
+do jogo, esse procedimento vai se apresentar como
+teste a sua sorte:
+
+Batalha: Caso teste sua sorte em batalha e ela seja
+favorável você consegue aplicar um golpe crítico ao
+monstro assim aplicando 2 pontos de dano extra, caso
+não tenha essa sorte o poder do seu ataque é cortado
+pela metade aplicando somente 1 de dano.

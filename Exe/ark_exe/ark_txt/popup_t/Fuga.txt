@@ -1,0 +1,3 @@
+    Em algumas batalhas você terá a opção de fugir caso
+você escolha fugir, automaticamente o monstro vai causar
+2 de dano a sua energia, esse é o preço da sua covardia.

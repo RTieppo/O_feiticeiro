@@ -1,31 +1,28 @@
 #Bibliotecas Extras
 import pyglet
 from pyglet.libs.win32 import constants
-import random
-import smtplib
-from email.message import EmailMessage
 from PySimpleGUI import PySimpleGUI as sg
 import time
-import os
 
-#funções complementares
-import telas_iniciais
-import telas_de_introdução
-import telas_jogo_0_100
-import telas_jogo_101_200
-import telas_jogo_201_300
-import telas_jogo_301_400
-import dados
-import gerador_de_arquivos_txt
-import telas_recorentes
-import gerador_de_mostro
-import aplicador_de_dano
-import alterador_de_indices
-import gerador_mapa
+#Bibliotecas internas
+from biblioteca_de_telas import telas_iniciais
+from biblioteca_de_telas import telas_de_introdução
+from biblioteca_de_telas import telas_jogo_0_100
+from biblioteca_de_telas import telas_jogo_101_200
+from biblioteca_de_telas import telas_jogo_201_300
+from biblioteca_de_telas import telas_jogo_301_400
+from biblioteca_de_telas import telas_recorentes
+from biblioteca_de_geradores import gerador_mapa
+from biblioteca_de_geradores import gerador_txt_user
+from biblioteca_de_geradores import gerador_de_dados
+from biblioteca_manipuladores import txt
+from biblioteca_combate import combate_gerais
+from biblioteca_combate import sorte_combate
+from externas import email
+
 import efeitos_sonoros
 
-#gravação de fonte fora do sistema
-
+#puxafonte fora do sistema
 constants.COINIT_MULTITHREADED = 0x2
 
 pyglet.font.add_file(r'.\font\PixelOperator8-Bold.ttf')
@@ -57,10 +54,24 @@ volta = None
 limita_botão_nome = limita_botao_sorte = 0
 
 #ativação de botão
-ativação_botão_sorte = 0
+ativação_botão_sorte = False
 
-#variaveis de combate
-resultado_batalha = ' '
+#indices base do jogador
+energia = habilidade = sorte = provisoes = 0
+
+#indices variaveis do jogador
+energia_v = habilidade_v = sorte_v = 0
+
+#poção jogador
+poção_base = ' '
+numero_poção = 0
+
+#indeces mostrons
+mostro_1_V = mostro_2_V = mostro_3_V = mostro_4_V = 0
+mostro_1_H = mostro_2_H = mostro_3_H = mostro_4_H = 0
+
+#nome global
+nome_jogador = ' '
 
 #confirmado de saida para tela inicial
 confirma_saida = 0
@@ -75,7 +86,6 @@ while True:
 
     Windows,eventos,valores = sg.read_all_windows(timeout= 1000)
     
-
     if janela_abertura and eventos == sg.TIMEOUT_EVENT:
 
         if abertura < 1:
@@ -105,8 +115,7 @@ while True:
                 janela_intro = telas_iniciais.tela_intro()
                 janela_abertura.close()
                 abertura += 1
-                break
-
+                
 #Janelaintro
 
     if Windows == janela_intro and eventos == sg.WIN_CLOSED or Windows == janela_intro and eventos == 'Sair':
@@ -118,16 +127,15 @@ while True:
         time.sleep(0.2)
         janela_nome = telas_de_introdução.tela_nome()
         janela_intro.close()
-        
-        
+           
     elif Windows == janela_intro and eventos == 'Regras':
         efeitos_sonoros.botão()
         time.sleep(0.2)
         janela_regras = telas_iniciais.tela_regras()
         janela_intro.close()
 
-    elif Windows == janela_intro and eventos == 'Biblioteca de mostros':
-        pass
+    elif Windows == janela_intro and eventos == 'Biblioteca':
+        sg.popup_no_titlebar('Em breve!', font=font2)
         #criar ação
 
     elif Windows == janela_intro and eventos == 'Créditos':
@@ -167,22 +175,18 @@ while True:
         arquivo = open(r'.\ark_txt\popup_t\sorte.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
         
-
     elif Windows == janela_regras and eventos == 'Inventário':
         arquivo = open(r'.\ark_txt\popup_t\inventario.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
-        
-        
+          
     elif Windows == janela_regras and eventos == 'Poções':
         arquivo = open(r'.\ark_txt\popup_t\poçoes.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
         
-
     elif Windows == janela_regras and eventos == 'Provisões':
         arquivo = open(r'.\ark_txt\popup_t\provisoes.txt', 'r', encoding='utf-8').read()
         Windows['info'] .update(arquivo)
         
-
 #janela Sugestão
 
     if Windows == janela_sugestao and eventos == sg.WIN_CLOSED:
@@ -193,27 +197,15 @@ while True:
         janela_sugestao.close()
     
     elif Windows == janela_sugestao and eventos == 'Enviar':
-        EMAIL_ADDRESS = dados.Email
-        EMAIL_PASSWORD = dados.Senha
-        texto_user = valores['usertexto']
-    
-        msg = EmailMessage()
-        msg['subject'] = 'Sugestões'
-        msg['From'] = dados.Email
-        msg['To'] = dados.Email
-        msg.set_content(texto_user)
+        Windows['mensagem'] .update('Enviando...')
+        Windows.refresh()
+        envio = email.envio(valores['usertexto'])
 
-        try:
-            with smtplib.SMTP_SSL('smtp.gmail.com',465) as smtp:
-                smtp.login(EMAIL_ADDRESS,EMAIL_PASSWORD)
-                smtp.send_message(msg)
-                Windows['mensagem'] .update('Sugestão Enviada! \n Obrigado!')
+        if envio == True:
+            Windows['mensagem'] .update('Sugestão Enviada! \n Obrigado!')
         
-        except TimeoutError as erro1:
-            Windows['mensagem'].update('Verifiqeu sua conecção')
-            
-        except Exception as erro2:
-            sg.popup_error(erro2, no_titlebar= True)
+        elif envio == 'Verifiqeu sua conexão!':
+            Windows['mensagem'].update(envio)
 
 #Janela Nome
 
@@ -222,6 +214,7 @@ while True:
 
     elif Windows == janela_nome and eventos == 'Voltar':
         limita_botão_nome = 0
+        nome_jogador = ' '
         janela_intro = telas_iniciais.tela_intro()
         janela_nome.close()
     
@@ -239,9 +232,7 @@ while True:
         
         else:
             Windows['aviso1'].update('Nome Valido!')
-            cria_txt = open(r'.\ark_txt\user\Nome.txt', 'w', encoding='utf-8')
-            cria_txt.write(nome_gerado)
-            cria_txt.close()
+            nome_jogador = nome_gerado
 
             if limita_botão_nome == 0:
                 #cria botão na janela
@@ -277,10 +268,6 @@ while True:
     if Windows == janela_boatos1 and eventos == sg.WIN_CLOSED:
         break
 
-    elif Windows == janela_boatos1 and eventos == 'Sair':
-        janela_boatos1.close()
-        break
-
     elif Windows == janela_boatos1 and eventos == 'Próximo':
         sg.user_settings_set_entry('-last position-', janela_boatos1.current_location())
         janela_boatos2 = telas_de_introdução.tela_boatos2()
@@ -291,18 +278,13 @@ while True:
         janela_dicas = telas_de_introdução.tela_dicas()
         janela_boatos1.close()
 
-
 #janela de boatos2
 
     if Windows == janela_boatos2 and eventos == sg.WIN_CLOSED:
         break
 
     elif Windows == janela_boatos2 and eventos == 'Começar':
-        gerador_de_arquivos_txt.reseta_i_E()
-        gerador_de_arquivos_txt.reseta_i_H()
-        gerador_de_arquivos_txt.reseta_i_S()
-        gerador_de_arquivos_txt.reseta_p()
-        gerador_de_arquivos_txt.reseta_mapa()
+        
         sg.user_settings_set_entry('-last position-', janela_boatos2.current_location())
         janela_000 = telas_jogo_0_100.tela_000()
         janela_boatos2.close()
@@ -312,78 +294,52 @@ while True:
         janela_boatos1 = telas_de_introdução.tela_boatos1()
         janela_boatos2.close()
 
-
 #janela 000 - gerador e validador de indices
 
     if Windows == janela_000 and eventos == sg.WIN_CLOSED:
         break
-
     #gera e valida os indices
 
     elif Windows == janela_000 and eventos == 'HABILIDADE':
-        limitador_h =int(open(r'.\ark_txt\ind\HAB_V.txt', 'r', encoding='utf-8').read())
-        
-        #Validação apartir do arquivo gerado do zero
 
-        if limitador_h <= 0:
-            numero_aleatorio = int(random.randint(1,6))
+        #verifica se já foi gerado
+        if habilidade <= 0:
+
+            numero_aleatorio = gerador_de_dados.dado_unico()
             soma_h = int(numero_aleatorio + 6)
 
             Windows['H'] .update(f'{numero_aleatorio}')
             Windows['S_H'] .update(f'= {soma_h}')
-            
-            arquivo0 = open(r'.\ark_txt\ind\HAB_V.txt', 'w', encoding='utf-8')
-            arquivo0.write(f'{soma_h}')
-            arquivo0.close()
 
-            arquivo1 = open(r'.\ark_txt\ind\HABILIDADE.txt', 'w', encoding='utf-8')
-            arquivo1.write(f'{soma_h}')
-            arquivo1.close()
+            habilidade = habilidade_v = soma_h
         
         else:
             Windows['aviso_indices'].update('Habilidade Já foi Gerada')
     
-
     elif Windows == janela_000 and eventos == 'ENERGIA':
-        limitador_e = int(open(r'.\ark_txt\ind\ENER_V.txt', 'r', encoding='utf-8').read())
 
-        if limitador_e <= 0:
-            numero_aleatorio1 = int(random.randint(1,6))
-            numero_aleatorio2 = int(random.randint(1,6))
-            soma_e = int((numero_aleatorio1 + numero_aleatorio2) + 12)
+        if energia <= 0:
+            numero_aleatorio = gerador_de_dados.dado_duplo()
+            soma_e = numero_aleatorio + 12
 
-            Windows['E'] .update(f'{numero_aleatorio1 + numero_aleatorio2}')
+            Windows['E'] .update(f'{numero_aleatorio}')
             Windows['S_E'] .update(f'= {soma_e}')
 
-            arquivo0 = open(r'.\ark_txt\ind\ENER_V.txt', 'w', encoding='utf-8')
-            arquivo0.write(f'{soma_e}')
-            arquivo0.close()
-
-            arquivo1 = open(r'.\ark_txt\ind\ENERGIA.txt', 'w', encoding='utf-8')
-            arquivo1.write(f'{soma_e}')
-            arquivo1.close()
+            energia = energia_v = soma_e
         
         else:
             Windows['aviso_indices'].update('Energia Já foi Gerada')
         
-
     elif Windows == janela_000 and eventos == 'SORTE':
-        limitador_s = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
 
-        if limitador_s <= 0:
-            numero_aleatorio = int(random.randint(1,6))
+        if sorte <= 0:
+            numero_aleatorio = gerador_de_dados.dado_unico()
             soma_s = int(numero_aleatorio + 6)
 
             Windows['S'] .update(f'{numero_aleatorio}')
             Windows['S_S'] .update(f'= {soma_s}')
 
-            arquivo0 = open(r'.\ark_txt\ind\Sort_V.txt', 'w', encoding='utf-8')
-            arquivo0.write(f'{soma_s}')
-            arquivo0.close()
-
-            arquivo1 = open(r'.\ark_txt\ind\SORTE.txt', 'w', encoding='utf-8')
-            arquivo1.write(f'{soma_s}')
-            arquivo1.close()
+            sorte = sorte_v = soma_s
         
         else:
             Windows['aviso_indices'].update('Sorte Já foi Gerada')
@@ -391,24 +347,21 @@ while True:
     #gera e valida as poçoes
 
     elif Windows == janela_000 and eventos == 'P1':
-        limitador_P1 = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
         
-        if limitador_P1 <=0:
-            gerador_de_arquivos_txt.grava_pocao_habilidade()
-            gerador_de_arquivos_txt.grava_Provisoes()
+        if numero_poção <=0:
+            numero_poção = 2
+            poção_base = 'Poção Habilidade:'
             Windows['C_P'].update('Habilidade selecionada')
 
         else:
             Windows['C_P'].update('')
             Windows['aviso_pocao'].update('Poção já foi Gerada')
             
-    
     elif Windows == janela_000 and eventos == 'P2':
-        limitador_P2 = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
 
-        if limitador_P2 <=0:
-            gerador_de_arquivos_txt.grava_pocao_forca()
-            gerador_de_arquivos_txt.grava_Provisoes()
+        if numero_poção <=0:
+            numero_poção = 2
+            poção_base = 'Poção Força:'
             Windows['C_P'].update('Força selecionada')
         
         else:
@@ -416,11 +369,10 @@ while True:
             Windows['aviso_pocao'].update('Poção já foi Gerada')
     
     elif Windows == janela_000 and eventos == 'P3':
-        limitador_P3 = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
 
-        if limitador_P3 <=0:
-            gerador_de_arquivos_txt.grava_pocao_fortuna()
-            gerador_de_arquivos_txt.grava_Provisoes()
+        if numero_poção <=0:
+            numero_poção = 2
+            poção_base = 'Poção Fortuna:'
             Windows['C_P'].update('Fortuna selecionada')
         
         else:
@@ -430,12 +382,10 @@ while True:
     #verifica se todos os itens foram gerados
 
     elif Windows == janela_000 and eventos == 'Estou pronto':
-        v_h = int(open(r'.\ark_txt\ind\HAB_V.txt', 'r', encoding='utf-8').read())
-        v_s = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
-        v_e = int(open(r'.\ark_txt\ind\ENER_V.txt', 'r', encoding='utf-8').read())
-        v_p = int(open(r'.\ark_txt\ind\Po_v.txt', 'r', encoding='utf-8').read())
 
-        if v_e > 0 and v_h > 0 and v_p > 0 and v_s > 0:
+        if energia > 0 and habilidade > 0 and sorte > 0 and numero_poção > 0:
+            provisoes = 10
+            txt.valida_txt()
             sg.user_settings_set_entry('-last position-', janela_000.current_location())
             janela_001 = telas_jogo_0_100.tela_001()
             janela_000.close()
@@ -445,8 +395,11 @@ while True:
             Windows['aviso_pocao'].update('')
             Windows['aviso_validador'].update('Confira os indices e poções')
 
-
     elif Windows == janela_000 and eventos == 'Voltar':
+        energia = habilidade = sorte = provisoes = 0
+        energia_v = habilidade_v = sorte_v = 0
+        numero_poção = 0
+        poção_base = ' '
         sg.user_settings_set_entry('-last position-', janela_000.current_location())
         janela_boatos2 = telas_de_introdução.tela_boatos2()
         janela_000.close()
@@ -454,10 +407,10 @@ while True:
     #reseta todas as info
 
     elif Windows == janela_000 and eventos == 'Resetar':
-        gerador_de_arquivos_txt.reseta_i_E()
-        gerador_de_arquivos_txt.reseta_i_H()
-        gerador_de_arquivos_txt.reseta_i_S()
-        gerador_de_arquivos_txt.reseta_p()
+        energia = habilidade = sorte = provisoes = 0
+        energia_v = habilidade_v = sorte_v = 0
+        numero_poção = 0
+        poção_base = ' '
         janela_000.close()
         janela_000 = telas_jogo_0_100.tela_000()
 
@@ -487,6 +440,10 @@ while True:
         else:
             janela_intro = telas_iniciais.tela_intro()
             confirma_saida = 0
+            energia = habilidade = sorte = provisoes = 0
+            energia_v = habilidade_v = sorte_v = 0
+            numero_poção = 0
+            poção_base = ' '
             janela_menu.close()
             volta.close()
 #janela Mapa
@@ -496,7 +453,7 @@ while True:
 
     elif Windows == janela_mapa and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_mapa.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_mapa.close()
     
     elif Windows == janela_mapa and eventos == 'Sair':
@@ -506,32 +463,8 @@ while True:
         janela_menu.close()
     
     elif Windows == janela_mapa and eventos == 'Salvar':
-        while True:
-            #indentifica user
-
-            sistema = os.environ
-            user = sistema['USERNAME']
-            
-            #Unifica user com caminho e gera lista
-            caminho1 = os.path.join(r'C:\Users',user,r'Documents')
-            validador = os.listdir(caminho1)
-
-            #caminho para criar a pasta 
-            caminho2 = os.path.join(caminho1,r'Save User')
-
-            #unifica caminho final e grava txt
-            caminho3 = os.path.join(caminho2,r'Mapa.txt')
-
-            if 'Save User' in validador:
-                save = open(r'.\ark_txt\map\Mapa.txt', 'r', encoding='utf-8').read()
-                criar_arquivo = open(caminho3, 'w', encoding='utf-8')
-                criar_arquivo.write(save)
-                criar_arquivo.close()
-                Windows['info'].update('Salvo em Documentos')
-                break
-
-            else:
-                os.makedirs(caminho2)
+        gerador_txt_user.save_mapa()
+        Windows['info'].update('Salvo em Documentos')
 
 #janela Morte
     if Windows == janela_morte and eventos == sg.WIN_CLOSED or Windows == janela_morte and eventos =='Sair':
@@ -541,36 +474,9 @@ while True:
         janela_intro = telas_iniciais.tela_intro()
         janela_morte.close()
     
-
     elif Windows == janela_morte and eventos == '-Salva-':
-        while True:
-            #indentifica user
-
-            sistema = os.environ
-            user = sistema['USERNAME']
-            
-            #Unifica user com caminho e gera lista
-            caminho1 = os.path.join(r'C:\Users',user,r'Documents')
-            validador = os.listdir(caminho1)
-
-            #caminho para criar a pasta 
-            caminho2 = os.path.join(caminho1,r'Save User')
-
-            #unifica caminho final e grava txt
-            caminho3 = os.path.join(caminho2,r'Mapa.txt')
-
-            if 'Save User' in validador:
-                save = open(r'.\ark_txt\map\Mapa.txt', 'r', encoding='utf-8').read()
-                criar_arquivo = open(caminho3, 'w', encoding='utf-8')
-                criar_arquivo.write(save)
-                criar_arquivo.close()
-                Windows['-aviso_save-'].update('Salvo em Documentos')
-                break
-
-            else:
-                os.makedirs(caminho2)
-
-#janelas recorentes fim
+        gerador_txt_user.save_mapa()
+        Windows['-aviso_save-'].update('Salvo em Documentos')
 
 #janela 001
 
@@ -581,8 +487,7 @@ while True:
         local = sg.user_settings_set_entry('-last position-', janela_001.current_location())
         
         #Grava mapa
-        gerador_mapa.mapa_tela_001()
-
+        gerador_mapa.grava_mapa('001 » ')
         janela_71 = telas_jogo_0_100.tela_71()
         janela_001.close()
         
@@ -591,14 +496,14 @@ while True:
         local = sg.user_settings_set_entry('-last position-', janela_001.current_location())
         
         #Grava mapa
-        gerador_mapa.mapa_tela_001()
+        gerador_mapa.grava_mapa('001 » ')
 
         janela_278_156 = telas_jogo_201_300.tela_278_156()
         janela_001.close()
 
     elif Windows == janela_001 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_001.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_001.hide()
         volta = janela_001
 
@@ -609,70 +514,53 @@ while True:
     
     elif Windows == janela_278_156 and eventos == 'Derrubar':
         sg.user_settings_set_entry('-last position-', janela_278_156.current_location())
-        Habi = int(open(r'.\ark_txt\ind\HABILIDADE.txt', 'r', encoding='utf-8').read())
         Windows['Info0'] .update('Você bate contra aporta com o ombro.')
 
         #validação de indice de habilidade
 
-        if Habi > 0:
-            Habi = int(open(r'.\ark_txt\ind\HABILIDADE.txt', 'r', encoding='utf-8').read())
-            numero_aleatorio01 = int(random.randint(1,6))
-            numero_aleatorio02 = int(random.randint(1,6))
+        resultado_278_156 = gerador_de_dados.dado_duplo()
 
-            if numero_aleatorio01+numero_aleatorio02 <= Habi:
-                #jogador consegui derrubar a porta
-                Windows['info2'] .update('A Porta ABRIU!')
-                janela_278_156.refresh()
-
-                #Diminui Habilidade jogador
-                alterador_de_indices.menos_habilidade()
-
-                #grava local no mapa
-                gerador_mapa.mapa_tela_278_156()
-
-                #vai para nova tela automatico
-                time.sleep(3)
-                janela_278_156.close()
-                janela_343 = telas_jogo_301_400.tela_343()
-                
-            elif numero_aleatorio01 + numero_aleatorio02 > Habi:
-                Windows['Info1'] .update('Você esfrega o ombro machucado \n  Resolvendo não tentar de novo.')
-                janela_278_156.refresh()
-                #jogador não consegui derrubar a porta muda de tela automatico
-
-                #grava local no mapa
-                gerador_mapa.mapa_tela_278_156()
-
-                time.sleep(3)
-                #vai para nova tela automatico
-                janela_92_71 = telas_jogo_0_100.tela_92_71()
-                janela_278_156.close()
-                    
-        else:
-            #validação não foi valida
-            Windows['Info1'] .update('Você está muito fraco!')
+        if resultado_278_156 <= habilidade:
+            #jogador consegui derrubar a porta
+            Windows['info2'] .update('A Porta ABRIU!')
             janela_278_156.refresh()
-            
+
+            #Diminui Habilidade jogador
+            habilidade_v -= 1
+
             #grava local no mapa
-            gerador_mapa.mapa_tela_278_156()
+            gerador_mapa.grava_mapa('278-156 » ')
 
-            time.sleep(2)
-
+            #vai para nova tela automatico
+            time.sleep(3)
             janela_278_156.close()
-            janela_92_71 = telas_jogo_0_100.tela_92_71()
+            janela_343 = telas_jogo_301_400.tela_343()
+            
+        elif resultado_278_156 > habilidade:
+            Windows['Info1'] .update('Você esfrega o ombro machucado \n  Resolvendo não tentar de novo.')
+            janela_278_156.refresh()
+            #jogador não consegui derrubar a porta muda de tela automatico
 
+            #grava local no mapa
+            gerador_mapa.grava_mapa('278-156 » ')
+
+            time.sleep(3)
+            #vai para nova tela automatico
+            janela_92_71 = telas_jogo_0_100.tela_92_71()
+            janela_278_156.close()
+                    
     elif Windows == janela_278_156 and eventos == 'Retornar':
         sg.user_settings_set_entry('-last position-', janela_278_156.current_location())
         
         #grava local no mapa
-        gerador_mapa.mapa_tela_278_156()
+        gerador_mapa.grava_mapa('278-156 » ')
         
         janela_92_71 = telas_jogo_0_100.tela_92_71()
         janela_278_156.close()
             
     elif Windows == janela_278_156 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_278_156.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_278_156.hide()
         volta = janela_278_156
  
@@ -683,7 +571,7 @@ while True:
 
     elif Windows == janela_343 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_343.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_343.hide()
         volta = janela_343
     
@@ -691,7 +579,7 @@ while True:
         sg.user_settings_set_entry('-last position-', janela_343.current_location())
         
         #grava local no mapa
-        gerador_mapa.mapa_tela_343()
+        gerador_mapa.grava_mapa('343 » ')
 
         janela_92_71 = telas_jogo_0_100.tela_92_71()
         janela_343.close()
@@ -703,35 +591,30 @@ while True:
 
     elif Windows == janela_71 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_71.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_71.hide()
         volta = janela_71
     
     elif Windows == janela_71 and eventos == 'Testar':
         sg.user_settings_set_entry('-last position-', janela_71.current_location())
-        sorte = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
+        sorte_v = 3 #remover depois
         
         #validando a sorte
+        if sorte_v > 0:
+            resultado_71 = gerador_de_dados.dado_duplo()
 
-        if sorte > 0:
-            numero_aleatorio1 = int(random.randint(1,6))
-            numero_aleatorio2 = int(random.randint(1,6))
-
-            if numero_aleatorio1 + numero_aleatorio2 <= sorte:
+            if resultado_71 <= sorte_v:
                 Windows['S1'].update('A Criatura não acordou!')
                 Windows['S2'].update('Você perdeu 1 ponto de sorte')
                 janela_71.refresh()
-
                 #sorte ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
                 #grava local no mapa
-                gerador_mapa.mapa_tela_71()
-                
+                gerador_mapa.grava_mapa('71 » ')
                 time.sleep(3)
                 #criar ação - em produção
                
-            elif numero_aleatorio1 + numero_aleatorio2 > sorte:
+            elif resultado_71> sorte_v:
                 #informa o jogador e atualiza a tela
                 Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
                 '\nOs olhos do ser se abrem instantaneamente')
@@ -739,16 +622,17 @@ while True:
                 janela_71.refresh()
                 
                 #sorte não ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
+                mostro_1_V = 1000 #voltar para 5 depois do test
+                mostro_1_H = 6
                 #grava local no mapa
-                gerador_mapa.mapa_tela_71()
-
+                gerador_mapa.grava_mapa('71 » ')
+                
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
 
                 time.sleep(3)
-                janela_248 = telas_jogo_201_300.tela_248()
+                janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
                 janela_71.close()
 
         else:
@@ -756,20 +640,16 @@ while True:
             #informa o jogador e atualiza a tela
             Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
             '\nOs olhos do ser se abrem instantaneamente')
-            Windows['S3'].update('Menos 1 ponto de Sorte\n        Hora de Lutar!')
+            Windows['S3'].update('Hora de Lutar!'.center())
             janela_71.refresh()
-            
-            #sorte não ajudou o jogador - diminui sorte variavel
-            alterador_de_indices.menos_sorte()
-
             #grava local no mapa
-            gerador_mapa.mapa_tela_71()
-
+            mostro_1_V = 1000 #voltar para 5 depois do test
+            mostro_1_H = 6
+            gerador_mapa.grava_mapa('71 » ')
             #pausa a tela para leitura da informação apresentada
             #depois troca a tela
-
             time.sleep(3)
-            janela_248 = telas_jogo_201_300.tela_248()
+            janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
             janela_71.close()
 
 # janela 92_71
@@ -779,38 +659,36 @@ while True:
 
     elif Windows == janela_92_71 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_92_71.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_92_71.hide()
         volta = janela_92_71
     
     elif Windows == janela_92_71 and eventos == 'Testar':
         sg.user_settings_set_entry('-last position-', janela_92_71.current_location())
-        sorte = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r', encoding='utf-8').read())
-        
+        sorte_v = 3 #remover depois
+
         #validando a sorte
 
-        if sorte > 0:
-            numero_aleatorio1 = int(random.randint(1,6))
-            numero_aleatorio2 = int(random.randint(1,6))
+        if sorte_v > 0:
+            resultado_92_71 = gerador_de_dados.dado_duplo()
 
-            if numero_aleatorio1 + numero_aleatorio2 <= sorte:
+            if resultado_92_71 <= sorte_v:
                 #informa o jogador e atualiza a tela
                 Windows['S1'].update('A Criatura não acordou!')
                 Windows['S2'].update('Você perdeu 1 ponto de sorte')
                 janela_92_71.refresh()
 
                 #sorte ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
                 #grava local no mapa
-                gerador_mapa.mapa_tela_92_71()
+                gerador_mapa.grava_mapa('92-71 »')
                 
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
                 time.sleep(3)
                 #criar ação - tela em criação
             
-            elif numero_aleatorio1 + numero_aleatorio2 > sorte:
+            elif resultado_92_71 > sorte_v:
                 #informa o jogador e atualiza a tela
                 Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
                 '\nOs olhos do ser se abrem instantaneamente')
@@ -818,18 +696,18 @@ while True:
                 janela_92_71.refresh()
 
                 #sorte não ajudou o jogador - diminui sorte variavel
-                alterador_de_indices.menos_sorte()
-
+                sorte_v -= 1
+                mostro_1_V = 1000 #voltar para 5 depois do test
+                mostro_1_H = 6
                 #gera mostro para a luta
-                gerador_de_mostro.orc01()
 
                 #grava local no mapa
-                gerador_mapa.mapa_tela_92_71()
+                gerador_mapa.grava_mapa('92-71 »')
 
                 #pausa a tela para leitura da informação apresentada
                 #depois troca a tela
                 time.sleep(3)
-                janela_248 = telas_jogo_201_300.tela_248()
+                janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
                 janela_92_71.close()
 
         else:
@@ -837,22 +715,19 @@ while True:
             #informa o jogador e atualiza a tela
             Windows['S2'] .update('você pisa em terreno mole e faz um barulho!'
             '\nOs olhos do ser se abrem instantaneamente')
-            Windows['S3'].update('Menos 1 ponto de Sorte\n        Hora de Lutar!')
+            Windows['S3'].update('Hora de Lutar!')
             janela_92_71.refresh()
 
-            #sorte não ajudou o jogador - diminui sorte variavel
-            alterador_de_indices.menos_sorte()
-
             #gera mostro para a luta
-            gerador_de_mostro.orc01()
-
+            mostro_1_V = 1000 #voltar para 5 depois do test
+            mostro_1_H = 6
             #grava local no mapa
-            gerador_mapa.mapa_tela_92_71()
+            gerador_mapa.grava_mapa('92-71 »')
 
             #pausa a tela para leitura da informação apresentada
             #depois troca a tela
             time.sleep(3)
-            janela_248 = telas_jogo_201_300.tela_248()
+            janela_248 = telas_jogo_201_300.tela_248(nome_jogador, mostro_1_H)
             janela_92_71.close()
     
 #janela 248 combate
@@ -862,7 +737,7 @@ while True:
     
     elif Windows == janela_248 and eventos == 'Menu':
         sg.user_settings_set_entry('-last position-', janela_248.current_location())
-        janela_menu = telas_recorentes.tela_menu()
+        janela_menu = telas_recorentes.tela_menu(energia, habilidade, sorte, provisoes, energia_v, habilidade_v, sorte_v, poção_base, numero_poção)
         janela_248.hide()
         volta = janela_248
     
@@ -873,98 +748,60 @@ while True:
         Windows['Sofre'] .update('')
         Windows['-dano_mostro-'] .update('')
         Windows['-dano_jogador-'] .update('')
+        ativação_botão_sorte = False
 
-        #abre vida jogador para validação
-        valida_energia_jogador = int(open(r'.\ark_txt\ind\ENER_V.txt','r', encoding='utf-8').read())
+        atk = combate_gerais.combateX1(energia_v,mostro_1_V,habilidade_v,mostro_1_H)
 
-         #abre vida da criatura
-        abre_vida_criatura = int(open(r'.\ark_txt\Batalha\orca.txt', 'r', encoding='utf-8').read())
+        if  limita_botao_sorte == 0:
+            #adicona botão sorte e trava a criação de novos botoes 
+            janela_248.extend_layout(janela_248['-botao_sorte-'],
+            [[sg.Button('Sorte',font=font2)]])
+            limita_botao_sorte += 1
+            #reseta ativação do botão sorte
+            ativação_botão_sorte = False
         
-        #valida vida jogador
-        if valida_energia_jogador > 0:
+        if atk[0] == 'Dano causado':
+            Windows['causa'] .update(atk[0])
+            #Mostra as informações da batalha para o jogador 
+            Windows['-dano_mostro-'] .update(atk[1])
+            Windows['-dano_jogador-'] .update(atk[2])
+            
+            #Atualiza vida da criatura e aplica dano normal
+            mostro_1_V -= 2
+        
+        elif atk[0] == 'Dano Sofrido':
+            Windows['Sofre'] .update(atk[0])
+            #Mostra as informações da batalha para o jogador 
+            Windows['-dano_mostro-'] .update(atk[1])
+            Windows['-dano_jogador-'] .update(atk[2])
 
-            #valida vida do mostro
-            if abre_vida_criatura > 0:
+            #atualiza vida do jogador
+            energia_v -= 2
+        
+        elif atk[0]== 'Esquiva':
+            Windows['Empate'] .update(atk[0])
+            #aplica informações na tela
+            Windows['-dano_mostro-'] .update(atk[1])
+            Windows['-dano_jogador-'] .update(atk[2])
 
-                #Abre aquivo para a validação da sorte e criação do botão
-                valida_sorte = int(open(r'.\ark_txt\ind\Sort_V.txt', 'r',encoding='utf-8').read())
-                
-                if valida_sorte > limita_botao_sorte:
-                    #adicona botão sorte e trava a criação de novos botoes 
-                    janela_248.extend_layout(janela_248['-botao_sorte-'],
-                    [[sg.Button('Sorte',font=font2)]])
-                    limita_botao_sorte += 30
-                
-                #reseta ativação do botão sorte
-                ativação_botão_sorte = 0
-                
-                #Gera a força do jogador e do mostro
-                força_user01 = int(random.randint(1,6))
-                força_user02 = int(random.randint(1,6))
+        elif atk == 'Criatura foi morta':
+            #informa jogador a morte de mostro reseta variaveis de combate
+            #troca de tela automaticamente com tempo de leitura para o jogador
+            Windows['causa'] .update(atk)
+            sg.user_settings_set_entry('-last position-', janela_248.current_location())
+            gerador_mapa.grava_mapa('248 »')
+            #limita_botao_sorte = 0
+            #ativação_botão_sorte = False
+            #liberar limitadores na alfa de test
+            #criar ação depois da morte da criatura - em criação
 
-                força_mostro01 = int(random.randint(1,6))
-                força_mostro02 = int(random.randint(1,6))
+        elif atk == 'Você foi morto':
+            #jogador morreu informa e grava no mapa
+            Windows['Sofre'] .update(atk)
+            gerador_mapa.morte_jogador()
+            janela_morte = telas_recorentes.tela_morte()
+            janela_248.close()
 
-                #abre habilidade variavel 
-                Habilidade_variavel = int(open(r'.\ark_txt\ind\HAB_V.txt','r', encoding='utf-8').read())
-
-                #soma força final
-                soma_força_user = força_user01 + força_user02 + Habilidade_variavel
-                soma_força_mostro = força_mostro01 + força_mostro02 + 6
-
-                if soma_força_user > soma_força_mostro:
-
-                    Windows['causa'] .update('Dano Causado')
-                    #Mostra as informações da batalha para o jogador 
-                    Windows['-dano_mostro-'] .update(soma_força_mostro)
-                    Windows['-dano_jogador-'] .update(soma_força_user)
-
-                    #grava resultado de combate para aplicar na sorte
-                    resultado_batalha = 'Dano_causado'
-                    
-                    #Atualiza vida da criatura e aplica dano normal
-                    aplicador_de_dano.dano_aumentado_normal()
-                    
-                elif soma_força_user < soma_força_mostro:
-
-                    Windows['Sofre'] .update('Dano Sofrido')
-                    #Mostra as informações da batalha para o jogador 
-                    Windows['-dano_mostro-'] .update(soma_força_mostro)
-                    Windows['-dano_jogador-'] .update(soma_força_user)
-
-                    #grava resultado de combate para aplicar na sorte
-                    resultado_batalha = 'Dano_sofrido'
-
-                    #atualiza vida do jogador
-                    aplicador_de_dano.dano_normal_recebido()
-                    
-
-                else:
-                    Windows['Empate'] .update('Esquiva')
-                    #aplica informações na tela
-                    Windows['-dano_mostro-'] .update(soma_força_mostro)
-                    Windows['-dano_jogador-'] .update(soma_força_user)
-
-            else:
-                        #informa jogador a morte de mostro reseta variaveis de combate
-                        #troca de tela automaticamente com tempo de leitura para o jogador
-                        Windows['causa'] .update('Criatura foi morta')
-                        sg.user_settings_set_entry('-last position-', janela_248.current_location())
-                        gerador_mapa.mapa_tela_248()
-                        #limita_botao_sorte = 0
-                        #resultado_batalha = ' '
-                        #ativação_botão_sorte = 0
-
-                        #liberar limitadores na alfa de test
-                        #criar ação depois da morte da criatura - em criação
-
-        else:
-                    #jogador morreu informa e grava no mapa
-                    Windows['Sofre'] .update('Você foi morto')
-                    gerador_mapa.morte_jogador()
-                    janela_morte = telas_recorentes.tela_morte()
-                    janela_248.close()
-    
     #ajusta uso da sorte e apresentação das informações para o jogador
     elif Windows == janela_248 and eventos == 'Sorte':
         #limpa informação da tela
@@ -974,61 +811,33 @@ while True:
         Windows['-dano_mostro-'] .update('')
         Windows['-dano_jogador-'] .update('')
 
-        #faz nova leitura dos arquivos para aplicar a sorte
-        vida_jogador = int(open(r'.\ark_txt\ind\ENER_V.txt', 'r', encoding='utf-8').read())
-        vida_criatura = int(open(r'.\ark_txt\Batalha\orca.txt', 'r', encoding='utf-8').read())
-        alterador_de_sorte_e_validador = int(open(r'.\ark_txt\ind\Sort_V.txt','r', encoding='utf-8').read())
-       
-        #validação se o botão sorte já foi usado
-        if ativação_botão_sorte <= 0:
+        usou_sorte = sorte_combate.uso_de_sorte(ativação_botão_sorte,sorte_v,atk)
 
-            #validação se jogador ainda tem sorte
-            if alterador_de_sorte_e_validador > 0:
-
-                #gerador de comparação de sorte
-                teste_sorte1 = int(random.randint(1,6))
-                teste_sorte2 = int(random.randint(1,6))
-
-                # ajusta sorte assim que usada
-                alterador_de_indices.menos_sorte()
-    
-                if resultado_batalha == 'Dano_causado':
-
-                    if alterador_de_sorte_e_validador > teste_sorte1 + teste_sorte2:
-                        #sorte ajudou jogador 
-                        Windows['causa'] .update('Dano ampliado')
-                        ativação_botão_sorte += 1
-                        #aplica dano aumentado
-                        aplicador_de_dano.dano_aumentado_normal()
-                        
-                    else:
-                        #sorte não ajudou na batalha
-                        Windows['Empate'] .update('Dano reduzido')
-                        ativação_botão_sorte += 1
-                        #Reduz dano normal
-                        aplicador_de_dano.dano_reduzido()
-                        
-                elif resultado_batalha == 'Dano_sofrido':
-                    #jogador teve sorte e dano foi reduzido
-                    if alterador_de_sorte_e_validador  > teste_sorte1 + teste_sorte2:
-                        Windows['causa'] .update('Sangramento contido')
-                        ativação_botão_sorte += 1
-                        aplicador_de_dano.conteve_sangramento()
-                        
-                    #jogador não teve sorte dano foi aumentado
-                    else:
-                        Windows['Sofre'] .update('Sangramento aumentado')
-                        ativação_botão_sorte += 1
-                        aplicador_de_dano.sangramento_aumentado()
-
-                #jogador e mostro tem força igual, sorte não é aplicavel      
-                else:
-                    Windows['Empate'] .update('sorte não aplicavel')
-            
-            #jogador esgotou a sorte
-            else:
-                Windows['Sofre'] .update('Sorte Esgotada')
+        if usou_sorte == 'Dano ampliado':
+            Windows['causa'] .update(usou_sorte)
+            mostro_1_V -= 2
+            ativação_botão_sorte = True
         
-        #sorte já foi usada naquela rodada
+        elif usou_sorte == 'Dano reduzido':
+            Windows['Empate'] .update(usou_sorte)
+            mostro_1_V -= 1
+            ativação_botão_sorte = True
+        
+        elif usou_sorte == 'Sangramento contido':
+            Windows['causa'] .update(usou_sorte)
+            ativação_botão_sorte = True
+            energia_v += 1
+        
+        elif usou_sorte == 'Sangramento aumentado':
+            Windows['Sofre'] .update(usou_sorte)
+            ativação_botão_sorte = True
+            energia_v -= 1
+        
+        elif usou_sorte == 'sorte não aplicavel':
+            Windows['Empate'] .update(usou_sorte)
+        
+        elif usou_sorte == 'Sorte Esgotada':
+            Windows['Sofre'] .update(usou_sorte)
+        
         else:
             Windows['Empate'] .update('sorte já usada')

@@ -35,6 +35,8 @@ font4 = ('Pixel Operator 8', 40)
 font5 = ('Pixel Operator SC', 20)
 font6 = ('Pixel Operator 8', 20)
 
+#função local
+
 #Atribuição de janelas
 #janelas iniciais
 
@@ -123,6 +125,17 @@ while True:
     
     elif Windows == janela_intro and eventos == 'Jogar':
         sg.user_settings_set_entry('-last position-', janela_intro.current_location())
+
+        limita_botão_nome = limita_botao_sorte = 0
+        ativação_botão_sorte = False
+        energia = habilidade = sorte = provisoes = 0
+        energia_v = habilidade_v = sorte_v = 0
+        poção_base = ' '
+        numero_poção = 0
+        mostro_1_V = mostro_2_V = mostro_3_V = mostro_4_V = 0
+        mostro_1_H = mostro_2_H = mostro_3_H = mostro_4_H = 0
+        nome_jogador = ' '
+
         efeitos_sonoros.botão()
         time.sleep(0.2)
         janela_nome = telas_de_introdução.tela_nome()
@@ -135,7 +148,7 @@ while True:
         janela_intro.close()
 
     elif Windows == janela_intro and eventos == 'Biblioteca':
-        sg.popup_no_titlebar('Em breve!', font=font2)
+        sg.Popup(font=font2, custom_text='Em breve!', no_titlebar= True)
         #criar ação
 
     elif Windows == janela_intro and eventos == 'Créditos':

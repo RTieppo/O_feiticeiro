@@ -3,6 +3,18 @@
 <div align="center">
  RPG de texto<br>Baseado no livro: O FEITICEIRO DA MONTANHA DE FOGO
  
+ <br>
+ 
+ ***
+ 
+ <h3 align="center"> Download para teste:</h3>
+ 
+ <br>
+ 
+<img alt="GitHub release (by tag)" src="https://img.shields.io/github/downloads/RTieppo/O_feiticeiro/Alfa_O_feiticeiro-v0.0.1/total?style=social">
+
+</div>
+ 
  ***
 
 <h2 align="center"> Previa: </h2>

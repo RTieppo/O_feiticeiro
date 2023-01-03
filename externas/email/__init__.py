@@ -19,7 +19,7 @@ def envio(txt):
             smtp.send_message(msg)
             return True
     
-    except TimeoutError as erro1:
+    except TimeoutError:
         return 'Verifiqeu sua conecção'
         
     except Exception as erro2:
